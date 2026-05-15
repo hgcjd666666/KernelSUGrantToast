@@ -18,6 +18,8 @@ int getKernelSuDriver();
 
 int getSuLogFd(int driverFd);
 
+void deleteSuLogFile();
+
 AndroidAppInfo queryAndroidApplicationInfo(pid_t pid);
 
 #endif //KERNELSUGRANTTOAST_UTIL_H

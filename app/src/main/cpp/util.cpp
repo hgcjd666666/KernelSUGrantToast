@@ -3,6 +3,7 @@
 #include "android/log.h"
 #include "fcntl.h"
 #include "sys/syscall.h"
+#include "dirent.h"
 
 using namespace std;
 #define KSU_INSTALL_MAGIC1 0xDEADBEEFu
@@ -15,6 +16,7 @@ static int zygotePid = -886;
 static int zygote64Pid = -996;
 
 bool readProcFile(const std::string &path, std::string &out) {
+
     int fd = open(path.c_str(), O_RDONLY | O_CLOEXEC);
     if (fd < 0) return false;
     string tmpString;
@@ -150,4 +152,23 @@ AndroidAppInfo queryAndroidApplicationInfo(pid_t pid) {
     }
     //是android应用了 再加个包名
     return {parentIsZygote, pid, getProcessCmdline(pid)};
+}
+
+void deleteSuLogFile() {
+    DIR *dir = opendir("/data/adb/ksu/log");
+    if (!dir) {
+        LOGW("Failed to open KernelSU log directory!");
+        return;
+    }
+    while (struct dirent *entry = readdir(dir)) {
+        if (entry->d_type != DT_REG) continue;
+        if (strstr(entry->d_name, "sulog-") != nullptr &&
+            strstr(entry->d_name, ".log") != nullptr) {
+            string path = "/data/adb/ksu/log/" + string(entry->d_name);
+            if (unlink(path.c_str()) < 0) {
+                LOGW("Failed to delete %s", path.c_str());
+            }
+        }
+    }
+    closedir(dir);
 }

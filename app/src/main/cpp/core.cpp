@@ -155,6 +155,7 @@ bool handleSuLog() {
     }
     std::thread pollingThread(pollingLogEvent, suLogFd);
     pollingThread.detach();
+    deleteSuLogFile();
     return true;
 }
 
