@@ -36,33 +36,33 @@ public class Entry {
             Log.e("KsuToast", "Need root access!!!");
             return;
         }
-        //自定义提示文本
-        if(args.length > 0 && args[0] != null) {
-            String tempCustomText = args[0];
-            Log.i(TAG, "Found custom toast text");
-            if(tempCustomText.length() < 65 && tempCustomText.contains("%s")) {
-                customToastText = tempCustomText;
-            } else {
-                Log.w(TAG, "Invalid custom toast text!");
-            }
-        } else {
-            Log.i(TAG, "Use default toast text");
-        }
-        if(args.length > 1 && args[1] != null) {
-            String tempRawIgnorePackageList = args[1];
-            Log.i(TAG, "Found ignore package list");
-            if(!tempRawIgnorePackageList.isEmpty()) {
-                String[] rawSplit = tempRawIgnorePackageList.split(";");
-                for(String packageName : rawSplit) {
-                    if(!packageName.isEmpty()) ignorePackageList.add(packageName);
-                }
-                Log.i(TAG, "Added all ignore package");
-            } else {
-                Log.w(TAG, "Invalid ignore package list");
-            }
-        }
-        HiddenApiBypass.addHiddenApiExemptions("Landroid/app/ActivityThread;");
         try {
+            //自定义提示文本
+            if(args.length > 0 && args[0] != null) {
+                String tempCustomText = args[0];
+                Log.i(TAG, "Found custom toast text");
+                if(tempCustomText.length() < 65 && tempCustomText.contains("%s")) {
+                    customToastText = tempCustomText;
+                } else {
+                    Log.w(TAG, "Invalid custom toast text!");
+                }
+            } else {
+                Log.i(TAG, "Use default toast text");
+            }
+            if(args.length > 1 && args[1] != null) {
+                String tempRawIgnorePackageList = args[1];
+                Log.i(TAG, "Found ignore package list");
+                if(!tempRawIgnorePackageList.isEmpty()) {
+                    String[] rawSplit = tempRawIgnorePackageList.split(";");
+                    for(String packageName : rawSplit) {
+                        if(!packageName.isEmpty()) ignorePackageList.add(packageName);
+                    }
+                    Log.i(TAG, "Added all ignore package");
+                } else {
+                    Log.w(TAG, "Invalid ignore package list");
+                }
+            }
+            HiddenApiBypass.addHiddenApiExemptions("Landroid/app/ActivityThread;");
             if(Looper.getMainLooper() == null) Looper.prepareMainLooper();
             @SuppressLint("PrivateApi") Class<?> activityThreadClass = Class.forName("android.app.ActivityThread");
             Object activityThread = HiddenApiBypass.invoke(activityThreadClass, null, "systemMain");
@@ -104,7 +104,7 @@ public class Entry {
 
     private static void showToast(String pkgName) {
         if(handler == null) handler = new Handler(Looper.getMainLooper());
-        handler.post(() -> Toast.makeText(systemContext, String.format(Locale.getDefault(),customToastText, pkgName), Toast.LENGTH_SHORT).show());
+        handler.post(() -> Toast.makeText(systemContext, String.format(Locale.getDefault(), customToastText, pkgName), Toast.LENGTH_SHORT).show());
     }
 
     public static void jniOnNewSuEvent(String cmdline) {
@@ -130,6 +130,8 @@ public class Entry {
             showToast(appName);
         } catch (PackageManager.NameNotFoundException e) {
             Log.w(TAG, "Failed to get app info", e);
+        }catch (Exception e){
+            Log.e(TAG, "Error on showing toast!", e);
         }
     }
 
