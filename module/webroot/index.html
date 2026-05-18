@@ -19,11 +19,23 @@
 <br>
 <button id="saveIgnorePackageNames">保存忽略包名</button>
 <br>
+<br>
+<span>高级设置(设置不当可能影响性能或导致工作异常)</span>
+<br>
+<input maxlength="2" step="1" type="number" max="32" min="0" id="packageSearchDepthInput" placeholder="1">
+<label for="packageSearchDepthInput">应用包搜索深度(过高影响性能 过低可能导致某些提权数据被忽略 默认1)
+    <br>
+    <span>通常保持默认已经够用 除非比较在意"Termux里运行的Codex里执行了su"这种极端情况</span>
+</label>
+<br>
+<button id="savePackageSearchDepth">保存搜索深度</button>
+<br>
 <span>所有更改需重启生效</span>
 </body>
 <script>
     let customToastTextInputElement;
     let ignorePackageNamesElement;
+    let packageSearchDepthInputElement;
     function shellQuote(value) {
         return `'${String(value).replace(/'/g, `'\\''`)}'`;
     }
@@ -39,11 +51,19 @@
             return
         }
     };
+    window.onLoadPackageSearchDepthConfig=(errno,stdout,stderr)=>{
+        if(errno===0){
+            packageSearchDepthInputElement.value=stdout?stdout:"1";
+            return
+        }
+    };
     window.addEventListener("load",()=>{
         customToastTextInputElement=document.getElementById("customToastTextInput");
         ignorePackageNamesElement=document.getElementById("ignorePackageNames");
+        packageSearchDepthInputElement=document.getElementById("packageSearchDepthInput");
         ksu.exec(`export KSU_MODULE=ksuGrantToast&&/data/adb/ksud module config get customToastText`,"onLoadCustomMessageConfig")
         ksu.exec(`export KSU_MODULE=ksuGrantToast&&/data/adb/ksud module config get ignorePackageNames`,"onLoadIgnorePackageNamesConfig")
+        ksu.exec(`export KSU_MODULE=ksuGrantToast&&/data/adb/ksud module config get packageSearchDepth`,"onLoadPackageSearchDepthConfig")
     });
     document.getElementById("saveCustomToastText").addEventListener("click",()=>{
         //校验
@@ -72,6 +92,22 @@
             ignorePackageNamesElement.value=tempInputValue;
         }
         ksu.exec(`export KSU_MODULE=ksuGrantToast&&/data/adb/ksud module config set ignorePackageNames ${shellQuote(tempInputValue)}`)
+        alert("保存成功");
+    });
+    document.getElementById("savePackageSearchDepth").addEventListener("click",()=>{
+        const tempInputValue=packageSearchDepthInputElement.value;
+        if(tempInputValue===""){
+            ksu.exec(`export KSU_MODULE=ksuGrantToast&&/data/adb/ksud module config delete packageSearchDepth`);
+            alert("已恢复默认配置");
+            return
+        }
+        const parsedValue=parseInt(tempInputValue);
+        if(isNaN(parsedValue)||parsedValue<0||parsedValue>32){
+            alert("请输入有效的数字 数值应为0-32之间");
+            return
+        }
+        packageSearchDepthInputElement.value=parsedValue;
+        ksu.exec(`export KSU_MODULE=ksuGrantToast&&/data/adb/ksud module config set packageSearchDepth ${shellQuote(tempInputValue)}`);
         alert("保存成功");
     });
 </script>

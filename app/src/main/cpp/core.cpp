@@ -21,6 +21,7 @@ static jclass globalEntryClass = nullptr;
 static jmethodID onNewSuEventJavaMethod = nullptr;
 static std::map<uint32_t, time_t> toastedApplication;
 static std::map<uint32_t, time_t> ignoredProcess;
+static short packageSearchDepth=1;
 
 struct __attribute__((packed)) EventRecordHeader {
     uint16_t record_type;
@@ -62,7 +63,7 @@ void processSuEvent(JNIEnv *threadJniEnv, uint32_t ppid) {
         if (currentTime - findPpidResult->second <= 3) return;
     }
     pushIgnoredProcessMap(ppid, currentTime);
-    AndroidAppInfo appInfo = queryAndroidApplicationInfo(static_cast<pid_t>(ppid),3);
+    AndroidAppInfo appInfo = queryAndroidApplicationInfo(static_cast<pid_t>(ppid),packageSearchDepth);
     if (appInfo.isAndroidApp && !appInfo.cmdline.empty()) {
         auto findToastedApplicationResult = toastedApplication.find(appInfo.realPid);
         if (findToastedApplicationResult != toastedApplication.end()) {
@@ -176,9 +177,10 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved) {
 
 extern "C"
 JNIEXPORT jboolean JNICALL
-Java_com_suisho_kernelsugranttoast_Entry_jniInit(JNIEnv *env, jclass clazz) {
+Java_com_suisho_kernelsugranttoast_Entry_jniInit(JNIEnv *env, jclass clazz, short searchDepth) {
     if (!utilInit()) return false;
     if (!handleSuLog()) return false;
+    packageSearchDepth = searchDepth;
     LOGI("JNI utilInit successful");
     return true;
 }
