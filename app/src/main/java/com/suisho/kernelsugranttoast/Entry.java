@@ -73,6 +73,8 @@ public class Entry {
                  IllegalAccessException | PackageManager.NameNotFoundException |
                  RuntimeException e) {
             Log.e(TAG, "Failed to init!", e);
+            //重新提权 否则无法执行ksud
+            jniSetUid(0);
             onInitFailed("Init failed!");
             systemContext = null;
             System.exit(1);
@@ -158,6 +160,7 @@ public class Entry {
     }
 
     private static void onNativeError(String msg) {
+        jniSetUid(0);
         modifyModuleDescription("❌" + msg);
         System.exit(1);
     }
