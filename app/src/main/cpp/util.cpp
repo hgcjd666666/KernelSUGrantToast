@@ -143,6 +143,7 @@ AndroidAppInfo queryAndroidApplicationInfo(pid_t pid, short depth) {
     //不可能有Android应用pid小于100
     if (targetPpid < 100) return {false, pid, ""};
     bool parentIsZygote = targetPpid == zygotePid || targetPpid == zygote64Pid;
+    //尝试深度搜索
     if (!parentIsZygote && depth > 0) {
         pid_t currentProcessPpid=targetPpid;
         pid_t newTargetPpid = targetPpid;
@@ -155,11 +156,6 @@ AndroidAppInfo queryAndroidApplicationInfo(pid_t pid, short depth) {
         }
         return {parentPpidIsZygote, currentProcessPpid,
                 parentPpidIsZygote ? getProcessCmdline(currentProcessPpid) : ""};
-//        //尝试获取一次父进程
-//        pid_t newTargetPpid = getPpid(targetPpid);
-//        bool parentPpidIsZygote =
-//                newTargetPpid == zygotePid || newTargetPpid == zygote64Pid;
-//        return {parentPpidIsZygote, targetPpid, getProcessCmdline(targetPpid)};
     }
     //是android应用了 再加个包名
     return {parentIsZygote, pid, parentIsZygote ? getProcessCmdline(pid) : ""};
