@@ -62,7 +62,7 @@ void processSuEvent(JNIEnv *threadJniEnv, uint32_t ppid) {
         if (currentTime - findPpidResult->second <= 3) return;
     }
     pushIgnoredProcessMap(ppid, currentTime);
-    AndroidAppInfo appInfo = queryAndroidApplicationInfo(static_cast<pid_t>(ppid));
+    AndroidAppInfo appInfo = queryAndroidApplicationInfo(static_cast<pid_t>(ppid),3);
     if (appInfo.isAndroidApp && !appInfo.cmdline.empty()) {
         auto findToastedApplicationResult = toastedApplication.find(appInfo.realPid);
         if (findToastedApplicationResult != toastedApplication.end()) {

@@ -138,20 +138,31 @@ pid_t getPpid(pid_t pid) {
     return -1;
 }
 
-AndroidAppInfo queryAndroidApplicationInfo(pid_t pid) {
+AndroidAppInfo queryAndroidApplicationInfo(pid_t pid, short depth) {
     pid_t targetPpid = getPpid(pid);
     //不可能有Android应用pid小于100
     if (targetPpid < 100) return {false, pid, ""};
     bool parentIsZygote = targetPpid == zygotePid || targetPpid == zygote64Pid;
-    if (!parentIsZygote) {
-        //尝试获取一次父进程
-        pid_t newTargetPpid = getPpid(targetPpid);
-        bool parentPpidIsZygote =
-                newTargetPpid == zygotePid || newTargetPpid == zygote64Pid;
-        return {parentPpidIsZygote, targetPpid, getProcessCmdline(targetPpid)};
+    if (!parentIsZygote && depth > 0) {
+        pid_t currentProcessPpid=targetPpid;
+        pid_t newTargetPpid = targetPpid;
+        bool parentPpidIsZygote = parentIsZygote;
+        for (short i = 0; i < depth; ++i) {
+            currentProcessPpid = newTargetPpid;
+            newTargetPpid = getPpid(newTargetPpid);
+            parentPpidIsZygote = newTargetPpid == zygotePid || newTargetPpid == zygote64Pid;
+            if (parentPpidIsZygote || newTargetPpid < 100) break;
+        }
+        return {parentPpidIsZygote, currentProcessPpid,
+                parentPpidIsZygote ? getProcessCmdline(currentProcessPpid) : ""};
+//        //尝试获取一次父进程
+//        pid_t newTargetPpid = getPpid(targetPpid);
+//        bool parentPpidIsZygote =
+//                newTargetPpid == zygotePid || newTargetPpid == zygote64Pid;
+//        return {parentPpidIsZygote, targetPpid, getProcessCmdline(targetPpid)};
     }
     //是android应用了 再加个包名
-    return {parentIsZygote, pid, getProcessCmdline(pid)};
+    return {parentIsZygote, pid, parentIsZygote ? getProcessCmdline(pid) : ""};
 }
 
 void deleteSuLogFile() {
