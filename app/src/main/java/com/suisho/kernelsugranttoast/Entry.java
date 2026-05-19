@@ -20,8 +20,9 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
+
 public class Entry {
-    private static final String TAG = "KsuToast";
+    private static final String TAG = "KernelSuGrantToast";
     private static Context systemContext;
     private static Handler handler;
     private static PackageManager packageManager;
@@ -29,16 +30,24 @@ public class Entry {
     private static final LruCache<String, String> appNameCache = new LruCache<>(16);
     private static String customToastText = "%s 已被授予超级用户权限";
     private static final HashSet<String> ignorePackageList = new HashSet<>();
-    private static short packageSearchDepth = 1;
+
+    private static class TempArguments {
+        public final short packageSearchDepth;
+        public final boolean checkSuCompat;
+        public TempArguments(short packageSearchDepth, boolean checkSuCompat) {
+            this.packageSearchDepth = packageSearchDepth;
+            this.checkSuCompat = checkSuCompat;
+        }
+    }
 
     @SuppressLint("UnsafeDynamicallyLoadedCode")
     public static void main(String[] args) {
         if(Process.myUid() != 0) {
-            Log.e("KsuToast", "Need root access!!!");
+            Log.e(TAG, "Need root access!!!");
             return;
         }
         try {
-            parseArguments(args);
+            var tmpArgs = parseArguments(args);
             HiddenApiBypass.addHiddenApiExemptions("Landroid/app/ActivityThread;");
             if(Looper.getMainLooper() == null) Looper.prepareMainLooper();
             @SuppressLint("PrivateApi") Class<?> activityThreadClass = Class.forName("android.app.ActivityThread");
@@ -56,7 +65,7 @@ public class Entry {
             //确定没有崩掉再加载
             //app_process没法加载内置so
             System.load(libraryFile.getAbsolutePath());
-            if(!jniInit(packageSearchDepth)) {
+            if(!jniInit(tmpArgs.packageSearchDepth, tmpArgs.checkSuCompat)) {
                 onInitFailed("Native init failed!");
                 System.exit(1);
                 return;
@@ -81,7 +90,9 @@ public class Entry {
         }
     }
 
-    private static void parseArguments(String[] args) {
+    private static TempArguments parseArguments(String[] args) {
+        short packageSearchDepth = 1;
+        boolean checkSuCompat = false;
         //自定义提示文本
         if(args.length > 0 && args[0] != null) {
             String tempCustomText = args[0];
@@ -107,21 +118,32 @@ public class Entry {
                 Log.w(TAG, "Invalid ignore package list");
             }
         }
-        if(args.length > 2 && args[2] != null){
-            try{
+        if(args.length > 2 && args[2] != null) {
+            try {
                 short tempSearchDepth = Short.parseShort(args[2]);
                 Log.i(TAG, "Found custom package search depth");
-                if(tempSearchDepth >= 0 && tempSearchDepth < 32) {
+                if(tempSearchDepth >= 0 && tempSearchDepth < 33) {
                     packageSearchDepth = tempSearchDepth;
                     Log.i(TAG, "Set package search depth to " + tempSearchDepth);
                 } else {
                     Log.w(TAG, "Invalid package search depth!");
                 }
-            }catch (NumberFormatException numberFormatException){
-                Log.e(TAG, "Invalid package search depth!",numberFormatException);
+            } catch (NumberFormatException numberFormatException) {
+                Log.e(TAG, "Invalid package search depth!", numberFormatException);
             }
         }
+        if(args.length > 3 && args[3] != null) {
+            try {
+                Log.i(TAG, "Found check su compat setting");
+                checkSuCompat = Boolean.parseBoolean(args[3]);
+                Log.i(TAG, "Set check su compat to " + checkSuCompat);
+            } catch (NumberFormatException numberFormatException) {
+                Log.e(TAG, "Invalid check su compat!", numberFormatException);
+            }
+        }
+        return new TempArguments(packageSearchDepth, checkSuCompat);
     }
+
     private static void showToast(String pkgName) {
         if(handler == null) handler = new Handler(Looper.getMainLooper());
         handler.post(() -> Toast.makeText(systemContext, String.format(Locale.getDefault(), customToastText, pkgName), Toast.LENGTH_SHORT).show());
@@ -185,7 +207,7 @@ public class Entry {
         }
     }
 
-    private static native boolean jniInit(short packageSearchDepth);
+    private static native boolean jniInit(short packageSearchDepth, boolean checkSuCompat);
 
     private static native void jniSetUid(int uid);
 }

@@ -22,7 +22,8 @@
 <br>
 <span>高级设置(设置不当可能影响性能或导致工作异常)</span>
 <br>
-<input maxlength="2" step="1" type="number" max="32" min="0" id="packageSearchDepthInput" placeholder="1">
+<input maxlength="2" step="1" type="number" max="32" min="0" id="packageSearchDepthInput"
+       placeholder="1">
 <label for="packageSearchDepthInput">应用包搜索深度(过高影响性能 过低可能导致某些提权数据被忽略 默认1)
     <br>
     <span>通常保持默认已经够用 除非比较在意"Termux里运行的Codex里执行了su"这种极端情况</span>
@@ -30,12 +31,19 @@
 <br>
 <button id="savePackageSearchDepth">保存搜索深度</button>
 <br>
+<input type="checkbox" id="useSuCompat">
+<label for="useSuCompat">检查SuCompat事件
+    <br>
+    <span>部分系统或应用只会触发该类型事件(极少出现这种情况)开启后可能修复提示遗漏或失效 但会增加性能开销</span>
+</label>
+<br>
 <span>所有更改需重启生效</span>
 </body>
 <script>
     let customToastTextInputElement;
     let ignorePackageNamesElement;
     let packageSearchDepthInputElement;
+    let useSuCompatElement;
     function shellQuote(value) {
         return `'${String(value).replace(/'/g, `'\\''`)}'`;
     }
@@ -57,13 +65,21 @@
             return
         }
     };
+    window.onLoadUseSuCompatConfig=(errno,stdout,stderr)=>{
+        if(errno===0){
+            useSuCompatElement.checked=stdout==="true";
+            return
+        }
+    };
     window.addEventListener("load",()=>{
         customToastTextInputElement=document.getElementById("customToastTextInput");
         ignorePackageNamesElement=document.getElementById("ignorePackageNames");
         packageSearchDepthInputElement=document.getElementById("packageSearchDepthInput");
+        useSuCompatElement=document.getElementById("useSuCompat");
         ksu.exec(`export KSU_MODULE=ksuGrantToast&&/data/adb/ksud module config get customToastText`,"onLoadCustomMessageConfig")
         ksu.exec(`export KSU_MODULE=ksuGrantToast&&/data/adb/ksud module config get ignorePackageNames`,"onLoadIgnorePackageNamesConfig")
         ksu.exec(`export KSU_MODULE=ksuGrantToast&&/data/adb/ksud module config get packageSearchDepth`,"onLoadPackageSearchDepthConfig")
+        ksu.exec(`export KSU_MODULE=ksuGrantToast&&/data/adb/ksud module config get useSuCompat`,"onLoadUseSuCompatConfig")
     });
     document.getElementById("saveCustomToastText").addEventListener("click",()=>{
         //校验
@@ -109,6 +125,9 @@
         packageSearchDepthInputElement.value=parsedValue;
         ksu.exec(`export KSU_MODULE=ksuGrantToast&&/data/adb/ksud module config set packageSearchDepth ${shellQuote(tempInputValue)}`);
         alert("保存成功");
+    });
+    document.getElementById("useSuCompat").addEventListener("change",()=>{
+        ksu.exec(`export KSU_MODULE=ksuGrantToast&&/data/adb/ksud module config set useSuCompat ${useSuCompatElement.checked?"true":"false"}`);
     });
 </script>
 </html>

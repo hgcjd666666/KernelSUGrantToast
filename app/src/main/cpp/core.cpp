@@ -15,13 +15,15 @@
 #define TASK_COMM_LEN  16
 #define KSU_EVENT_TYPE_DROPPED 0xFFFFu
 #define KSU_SULOG_EVENT_ROOT_EXECVE 1u
+#define KSU_SULOG_EVENT_SUCOMPAT 2u
 static constexpr char ksudExec[] = "ksud";
 static JavaVM *jvm = nullptr;
 static jclass globalEntryClass = nullptr;
 static jmethodID onNewSuEventJavaMethod = nullptr;
 static std::map<uint32_t, time_t> toastedApplication;
 static std::map<uint32_t, time_t> ignoredProcess;
-static short packageSearchDepth=1;
+static short packageSearchDepth = 1;
+static bool checkSuCompat = false;
 
 struct __attribute__((packed)) EventRecordHeader {
     uint16_t record_type;
@@ -63,7 +65,8 @@ void processSuEvent(JNIEnv *threadJniEnv, uint32_t ppid) {
         if (currentTime - findPpidResult->second <= 3) return;
     }
     pushIgnoredProcessMap(ppid, currentTime);
-    AndroidAppInfo appInfo = queryAndroidApplicationInfo(static_cast<pid_t>(ppid),packageSearchDepth);
+    AndroidAppInfo appInfo = queryAndroidApplicationInfo(static_cast<pid_t>(ppid),
+                                                         packageSearchDepth);
     if (appInfo.isAndroidApp && !appInfo.cmdline.empty()) {
         auto findToastedApplicationResult = toastedApplication.find(appInfo.realPid);
         if (findToastedApplicationResult != toastedApplication.end()) {
@@ -114,12 +117,17 @@ void pollingLogEvent(int suLogFd) {
                         if (rec->record_type != KSU_EVENT_TYPE_DROPPED) {
                             auto *hdr = reinterpret_cast<SulogEventHeader *>(buf + off +
                                                                              sizeof(EventRecordHeader));
-                            if (rec->payload_len >= sizeof(SulogEventHeader) && hdr->retval == 0 &&
-                                hdr->event_type == KSU_SULOG_EVENT_ROOT_EXECVE) {
-                                //只有这个是来自第三方的调用 GRANT_ROOT是对管理器自动授权 不要处理
-                                //应该是所有root获取都会走ksud
-                                if (std::memcmp(ksudExec, hdr->comm, sizeof(ksudExec)) == 0)
+                            if (rec->payload_len >= sizeof(SulogEventHeader) && hdr->retval == 0) {
+//                              //只有这两个是来自第三方的调用 GRANT_ROOT是对管理器自动授权 不要处理
+//                              //绝大多数root获取都会走ksud
+                                if (hdr->event_type == KSU_SULOG_EVENT_ROOT_EXECVE) {
+                                    if (std::memcmp(ksudExec, hdr->comm, sizeof(ksudExec)) == 0)
+                                        processSuEvent(localJniEnv, hdr->ppid);
+                                //少数情况 给用户选择要不要开
+                                } else if (checkSuCompat &&
+                                           hdr->event_type == KSU_SULOG_EVENT_SUCOMPAT) {
                                     processSuEvent(localJniEnv, hdr->ppid);
+                                }
                             }
                         }
                         off += frame;
@@ -177,10 +185,12 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved) {
 
 extern "C"
 JNIEXPORT jboolean JNICALL
-Java_com_suisho_kernelsugranttoast_Entry_jniInit(JNIEnv *env, jclass clazz, short searchDepth) {
+Java_com_suisho_kernelsugranttoast_Entry_jniInit(JNIEnv *env, jclass clazz, short searchDepth,
+                                                 jboolean checkCompat) {
+    packageSearchDepth = searchDepth;
+    checkSuCompat = checkCompat;
     if (!utilInit()) return false;
     if (!handleSuLog()) return false;
-    packageSearchDepth = searchDepth;
     LOGI("JNI utilInit successful");
     return true;
 }
