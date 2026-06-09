@@ -10,7 +10,7 @@ import { toast } from "sonner"
 export default function ToastTextInput() {
     const languageContext = useContext(LanguageContext);
     const { getLang } = useI18n(languageContext);
-    const { getStringConfig, setConfig, deleteConfig } = useKsu(true);
+    const { getStringConfig, setConfig, deleteConfig } = useKsu();
     const [customToastText, setCustomToastText] = useState<string>("");
     useEffect(() => {
         getStringConfig("customToastText").then(text => {
