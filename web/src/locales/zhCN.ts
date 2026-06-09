@@ -5,6 +5,7 @@ const ChineseKeys = {
     "text.reboot.tip":"需要重启设备以应用更改",
     "text.ok": "确定",
     "text.cancel": "取消",
+    "text.detail":"详情",
 
     "tabs.base": "基础",
     "tabs.ignorePackage": "忽略列表",
@@ -26,6 +27,17 @@ const ChineseKeys = {
     "ignorePackage.add":"添加应用",
     "ignorePackage.add.dialog.description":"点击应用项以添加",
     "ignorePackage.add.dialog.search.placeholder":"根据应用名或包名过滤",
-    "ignorePackage.add.exist":"此应用已在列表中"
+    "ignorePackage.add.exist":"此应用已在列表中",
+
+
+    "advanced.warning":"该页面设置调整不当可能影响性能或导致工作异常",
+    "advanced.searchDepth.reset.success":"已恢复默认值",
+    "advanced.searchDepth.label":"应用包搜索深度",
+    "advanced.searchDepth.save.failed.invalid":"输入数值无效 应为0-32之间",
+    "advanced.searchDepth.description":"输入应为0-32之间 默认值1",
+    "advanced.searchDepth.description.detail":'过高影响性能 过低可能导致某些提权数据被忽略 通常保持默认已经够用.除非比较在意如"Termux里运行的Codex里执行了su"这种极端情况',
+
+    "advanced.suCompat.label":"检查SuCompat事件",
+    "advanced.suCompat.description":"仅建议在无法正常提示时启用"
 }
 export default ChineseKeys;

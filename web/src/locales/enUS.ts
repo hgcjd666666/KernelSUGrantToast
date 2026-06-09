@@ -6,6 +6,7 @@ const EnglishKeys: typeof BaseLang = {
   "text.reboot.tip": "Reboot device to apply changes",
   "text.ok": "Confirm",
   "text.cancel": "Cancel",
+  "text.detail": "Detail",
 
 
   "tabs.advanced": "Advanced",
@@ -29,5 +30,15 @@ const EnglishKeys: typeof BaseLang = {
   "ignorePackage.add.dialog.description": "Click an application item to add",
   "ignorePackage.add.dialog.search.placeholder":"Filter by name or package name",
   "ignorePackage.add.exist": "This application is already in the list",
+
+  "advanced.warning": "The advanced settings may cause performance issues or cause abnormal work",
+  "advanced.searchDepth.reset.success": "Reset to default",
+  "advanced.searchDepth.label": "Package Search Depth",
+  "advanced.searchDepth.save.failed.invalid": "Invalid input, should be between 0 and 32",
+  "advanced.searchDepth.description": "Input should be between 0 and 32",
+  "advanced.searchDepth.description.detail": 'High search depth may cause performance issues, low search depth may cause some applications to be ignored\nUsually the default value is enough, but if you are sure that "Termux runs Codex and executes su"',
+
+  "advanced.suCompat.label": "Check SuCompat event",
+  "advanced.suCompat.description": "Only recommended when it cannot be prompted normally",
 }
 export default EnglishKeys;

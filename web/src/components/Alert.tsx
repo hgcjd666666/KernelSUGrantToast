@@ -5,9 +5,9 @@ interface AlertProps {
     title: string;
     description: string;
     confirmText: string;
-    cancelText: string;
+    cancelText?: string;
     onConfirm: () => void;
-    onCancel: () => void;
+    onCancel?: () => void;
 }
 export function Alert({ open, title, description, confirmText, cancelText, onConfirm, onCancel }: AlertProps) {
     return (
@@ -18,7 +18,7 @@ export function Alert({ open, title, description, confirmText, cancelText, onCon
                     <AlertDialogDescription>{description}</AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel onClick={onCancel}>{cancelText}</AlertDialogCancel>
+                    {(cancelText && onCancel) && <AlertDialogCancel onClick={onCancel}>{cancelText}</AlertDialogCancel>}
                     <AlertDialogAction onClick={onConfirm}>{confirmText}</AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>

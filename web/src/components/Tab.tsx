@@ -2,6 +2,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { LanguageContext } from "@/contexts/LanguageContext";
 import { useI18n } from "@/hooks/useI18n"
 import type SupportedLangs from "@/locales/SupportedLangs";
+import AdvancedPage from "@/pages/AdvancedPage/AdvancedPage";
 import BasePage from "@/pages/BasePage/BasePage";
 import IgnorePackagePage from "@/pages/IgnorePackagePage/IgnorePackagePage";
 import { useContext } from "react";
@@ -12,6 +13,7 @@ export function Tab({setLanguage}:TabProps) {
     const languageContext = useContext(LanguageContext);
     const { getLang } = useI18n(languageContext);
     // TODO 英语翻译最后让AI查一次
+    //TODO 禁止缩放 选择文本
     return (
         <Tabs defaultValue="base" className="w-full h-full">
             <TabsList variant="line">
@@ -25,7 +27,9 @@ export function Tab({setLanguage}:TabProps) {
             <TabsContent value="ignorePackage" className="min-h-0">
                 <IgnorePackagePage/>
             </TabsContent>
-            <TabsContent value="advanced">advanced</TabsContent>
+            <TabsContent value="advanced">
+                <AdvancedPage/>
+            </TabsContent>
         </Tabs>
     )
 }

@@ -8,7 +8,12 @@ export function useKsu() {
         console.warn("ipc mocking!");
     }
     const getStringConfig = useCallback(async (configKey: string) => {
-        if (mock) return "mocking"
+        if (mock) {
+            if (configKey==="packageSearchDepth") {
+                return "6"
+            }
+            return "mocking"
+        }
         const result = await exec(`export KSU_MODULE=ksuGrantToast&&/data/adb/ksud module config get ${configKey}`)
         if (result.errno !== 0) return null;
         return result.stdout
