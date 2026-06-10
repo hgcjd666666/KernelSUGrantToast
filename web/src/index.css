@@ -140,3 +140,7 @@ body {
   margin: 0;
   overflow: hidden;
 }
+*{
+  user-select: none;
+  touch-action: pan-x pan-y;
+}

@@ -37,7 +37,7 @@ export default function AddApplicationDialog({ open, onAddApplication, onCancel 
                     <DialogDescription>{getLang("ignorePackage.add.dialog.description")}</DialogDescription>
                 </DialogHeader>
                 <Input placeholder={getLang("ignorePackage.add.dialog.search.placeholder")} disabled={userPackages.length === 0} value={searchValue} onChange={e => setSearchValue(e.target.value)} />
-                <div className="max-h-[55vh] overflow-y-scroll no-scrollbar">
+                <div className="max-h-[55vh] overflow-y-scroll no-scrollbar overscroll-none">
                     <Table className="table-fixed w-full">
                         <TableBody>
                             {

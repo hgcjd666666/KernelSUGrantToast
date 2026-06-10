@@ -42,7 +42,7 @@ const ChineseKeys = {
     "advanced.suCompat.description":"仅建议在无法正常提示时启用",
     "advanced.suCompat.description.detail":"部分系统或应用只会触发该类型事件(极少出现这种情况) 开启后可能修复提示遗漏或失效 但会增加性能开销",
 
-    "about.description":"让KSU像Magisk一样弹出授予超级用户权限Toast",
+    "about.description":"像Magisk一样弹出授予超级用户权限Toast",
     "about.button.repository":"项目仓库",
     "about.otherProjects.title":"其他项目",
     "about.otherProjects.description.kyouka":"支持修改网页、拦截调用、数据导出等的多功能浏览器扩展",
