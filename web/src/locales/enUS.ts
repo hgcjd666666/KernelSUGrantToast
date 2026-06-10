@@ -12,6 +12,7 @@ const EnglishKeys: typeof BaseLang = {
   "tabs.advanced": "Advanced",
   "tabs.ignorePackage": "Ignore List",
   "tabs.base": "Base",
+  "tabs.about": "About",
 
   "language.label": "Language",
   "language.select": "Select Language",
@@ -40,5 +41,6 @@ const EnglishKeys: typeof BaseLang = {
 
   "advanced.suCompat.label": "Check SuCompat event",
   "advanced.suCompat.description": "Only recommended when it cannot be prompted normally",
+  "advanced.suCompat.description.detail": "Some systems or applications will only trigger this type of event (very few occurrences) Enabling this option may fix the problem of missing or invalid prompts but will increase performance overhead",
 }
 export default EnglishKeys;

@@ -25,7 +25,6 @@ export function useKsu() {
         return result.stdout === "true"
     }, []);
     const setConfig = useCallback(async (configKey: string, value: string) => {
-        console.log(value);
         if (mock) return true
         const result = await exec(`export KSU_MODULE=ksuGrantToast&&/data/adb/ksud module config set ${configKey} ${shellQuote(value)}`)
         return result.errno === 0
