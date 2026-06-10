@@ -18,7 +18,7 @@ const EnglishKeys: typeof BaseLang = {
   "language.select": "Select Language",
 
   "toast.custom.title": "Custom Toast Message",
-  "toast.custom.placeholder": "%s was granted Superuser rights",
+  "toast.custom.placeholder": "%s was granted Superuser rights",//Magisk提示原句 不要改
   "toast.custom.description": "Must contain the '%s' placeholder and be fewer than 64 characters",
   "toast.save.reset.success": "Default toast message restored",
   "toast.save.error.invalidLength": "Message length must be less than 64 characters",

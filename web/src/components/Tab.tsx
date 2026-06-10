@@ -13,8 +13,6 @@ interface TabProps {
 export function Tab({setLanguage}:TabProps) {
     const languageContext = useContext(LanguageContext);
     const { getLang } = useI18n(languageContext);
-    // TODO 英语翻译最后让AI查一次
-    //TODO 禁止缩放 选择文本
     return (
         <Tabs defaultValue="base" className="w-full h-full">
             <TabsList variant="line">

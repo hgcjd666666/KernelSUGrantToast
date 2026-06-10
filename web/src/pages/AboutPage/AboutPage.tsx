@@ -33,7 +33,8 @@ export default function AboutPage() {
                     <TableBody>
                         {
                             ProjectsList.map((item, index) =>
-                                <TableRow key={index} onClick={() => {
+                                // 只对中文用户展示部分项目 因为它们没有多语言支持且暂无计划(或实现太难)添加
+                                <TableRow hidden={language!=="zh"&&!item.hasI18n} key={index} onClick={() => {
                                     openUrl(item.url)
                                 }}>
                                     <TableCell className="whitespace-normal break-all">
