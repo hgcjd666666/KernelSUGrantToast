@@ -3,13 +3,13 @@ import { exec, listPackages, getPackagesInfo } from "kernelsu"
 import { useCallback } from "react"
 export function useKsu() {
     //TODO 发布前移除mock
-    const mock=!Reflect.has(window,"ksu");
+    const mock = !Reflect.has(window, "ksu");
     if (mock) {
         console.warn("ipc mocking!");
     }
     const getStringConfig = useCallback(async (configKey: string) => {
         if (mock) {
-            if (configKey==="packageSearchDepth") {
+            if (configKey === "packageSearchDepth") {
                 return "6"
             }
             return "mocking"
@@ -73,5 +73,9 @@ export function useKsu() {
             }
         }).filter(info => info.name !== undefined)
     }, []);
-    return { getStringConfig, getBooleanConfig, setConfig, deleteConfig, listAllPackages, getPackageInfo }
+    const openUrl = useCallback((url:string) => {
+        if(mock) return
+        exec(`am start -a android.intent.action.VIEW -c android.intent.category.BROWSABLE -d '${url}'`)
+    }, []);
+    return { getStringConfig, getBooleanConfig, setConfig, deleteConfig, listAllPackages, getPackageInfo ,openUrl}
 }

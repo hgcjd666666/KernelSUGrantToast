@@ -42,5 +42,14 @@ const EnglishKeys: typeof BaseLang = {
   "advanced.suCompat.label": "Check SuCompat event",
   "advanced.suCompat.description": "Only recommended when it cannot be prompted normally",
   "advanced.suCompat.description.detail": "Some systems or applications will only trigger this type of event (very few occurrences) Enabling this option may fix the problem of missing or invalid prompts but will increase performance overhead",
+
+  "about.description":"Show a root granted toast like Magisk",
+  "about.button.repository":"Project Repository",
+  "about.otherProjects.title":"Other Projects",
+  "about.otherProjects.description.kyouka":"A versatile browser extension that supports modifying web pages, intercepting calls, exporting data, and more",
+  "about.otherProjects.description.connector.windows":"Cross-network file transfer and text/notification forwarding (Windows side)",
+  "about.otherProjects.description.connector.android":"Cross-network file transfer and text/notification forwarding (Android side)",
+  "about.otherProjects.description.ruru":"A branch of the most popular app list detector, increasing detection strength and supporting custom detection targets",
+
 }
 export default EnglishKeys;

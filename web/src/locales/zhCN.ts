@@ -40,6 +40,14 @@ const ChineseKeys = {
 
     "advanced.suCompat.label":"检查SuCompat事件",
     "advanced.suCompat.description":"仅建议在无法正常提示时启用",
-    "advanced.suCompat.description.detail":"部分系统或应用只会触发该类型事件(极少出现这种情况) 开启后可能修复提示遗漏或失效 但会增加性能开销"
+    "advanced.suCompat.description.detail":"部分系统或应用只会触发该类型事件(极少出现这种情况) 开启后可能修复提示遗漏或失效 但会增加性能开销",
+
+    "about.description":"让KSU像Magisk一样弹出授予超级用户权限Toast",
+    "about.button.repository":"项目仓库",
+    "about.otherProjects.title":"其他项目",
+    "about.otherProjects.description.kyouka":"支持修改网页、拦截调用、数据导出等的多功能浏览器扩展",
+    "about.otherProjects.description.connector.windows":"在局域网内让手机和电脑互相传输文件、转发通知等(Windows端)",
+    "about.otherProjects.description.connector.android":"在局域网内让手机和电脑互相传输文件和文本、转发通知等(Android端)",
+    "about.otherProjects.description.ruru":"知名应用列表检测器的分支, 增加检测强度并支持自定义检测目标应用"
 }
 export default ChineseKeys;

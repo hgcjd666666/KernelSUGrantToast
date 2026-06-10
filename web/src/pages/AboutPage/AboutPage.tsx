@@ -1,6 +1,50 @@
+import { Button } from "@/components/ui/button";
+import { FieldDescription } from "@/components/ui/field";
+import { Separator } from "@/components/ui/separator";
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
+import { LanguageContext } from "@/contexts/LanguageContext";
+import { useI18n } from "@/hooks/useI18n";
+import { GitBranch } from "lucide-react";
+import { useContext } from "react";
+import ProjectItem from "./components/ProjectItem";
+import ProjectsList from "./projects"
+import { useKsu } from "@/hooks/useKsu";
 
 export default function AboutPage() {
+    const language = useContext(LanguageContext);
+    const { getLang } = useI18n(language);
+    const { openUrl } = useKsu();
     return (
-        <></>
+        <>
+            <div className="flex flex-col items-center">
+                <h3 className="text-2xl text-center">KernelSU Grant Toast</h3>
+                <span>{getLang("about.description")}</span>
+                <Button className="mt-2 w-[70%]" onClick={()=>{
+                    openUrl("https://github.com/NativeStar/KernelSUGrantToast")
+                }}>
+                    <GitBranch />
+                    {getLang("about.button.repository")}
+                </Button>
+                <Separator className="mt-2" />
+                <FieldDescription className="mt-2">
+                    {getLang("about.otherProjects.title")}
+                </FieldDescription>
+                <Table className="table-fixed w-full">
+                    <TableBody>
+                        {
+                            ProjectsList.map((item, index) =>
+                                <TableRow key={index} onClick={() => {
+                                    openUrl(item.url)
+                                }}>
+                                    <TableCell className="whitespace-normal break-all">
+                                        <ProjectItem title={item.title} description={getLang(item.description)} />
+                                    </TableCell>
+                                </TableRow>
+                            )
+                        }
+                    </TableBody>
+                </Table>
+            </div>
+        </>
     )
 }
