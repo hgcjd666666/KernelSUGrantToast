@@ -7,6 +7,7 @@ import { useI18n } from "@/hooks/useI18n";
 import { useKsu } from "@/hooks/useKsu";
 import { CircleQuestionMark } from "lucide-react";
 import { useContext, useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export default function CheckCompatEventSetting() {
     const languageContext = useContext(LanguageContext);
@@ -19,8 +20,9 @@ export default function CheckCompatEventSetting() {
         getBooleanConfig("checkSuCompat").then(value => setCheckSuCompat(value === null ? false : value))
     }, []);
     function onSwitchChange() {
-        setConfig("checkSuCompat", String(!checkSuCompat)).then(() => {
-            setCheckSuCompat(!checkSuCompat);
+        setConfig("checkSuCompat", String(!checkSuCompat)).then((result) => {
+            result ? toast.success(getLang("text.save.success"), { description: getLang("text.reboot.tip") }) : toast.error(getLang("text.save.failed"));
+            result && setCheckSuCompat(!checkSuCompat);
         })
     }
     return (

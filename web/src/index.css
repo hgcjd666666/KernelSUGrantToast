@@ -132,6 +132,10 @@ html, body, #root {
   height: 100%;
 }
 
+#root {
+  padding-top: var(--window-inset-top, var(--safe-area-inset-top, 0px));
+}
+
 body {
   margin: 0;
   overflow: hidden;
