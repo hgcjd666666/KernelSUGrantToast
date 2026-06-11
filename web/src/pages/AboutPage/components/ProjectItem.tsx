@@ -6,7 +6,7 @@ interface ProjectItemProps {
 export default function ProjectItem({description,title}:ProjectItemProps) {
     return (
         <div className="flex flex-col min-w-0">
-            <span className="">{title}</span>
+            <span>{title}</span>
             <FieldDescription className="wrap-break-word break-all">{description}</FieldDescription>
         </div>
     )

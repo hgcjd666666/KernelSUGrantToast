@@ -48,7 +48,7 @@ export default function SearchDepthSetting() {
                 </ButtonGroup>
                 <FieldDescription className="flex items-center">
                     {getLang("advanced.searchDepth.description")}
-                    <Badge variant="ghost" className="" onClick={() => setOpenDetailAlert(true)}>
+                    <Badge variant="ghost" onClick={() => setOpenDetailAlert(true)}>
                         <CircleQuestionMark />
                     </Badge>
                 </FieldDescription>
