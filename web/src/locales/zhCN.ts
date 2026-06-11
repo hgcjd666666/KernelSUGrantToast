@@ -1,4 +1,4 @@
-const ChineseKeys = {
+const SimplifiedChineseKeys = {
     "text.save": "保存",
     "text.save.success": "保存成功",
     "text.save.failed": "由于未知异常,配置保存失败",
@@ -50,4 +50,4 @@ const ChineseKeys = {
     "about.otherProjects.description.connector.android":"在局域网内让手机和电脑互相传输文件和文本、转发通知等(Android端)",
     "about.otherProjects.description.ruru":"知名应用列表检测器的分支, 增加检测强度并支持自定义检测目标应用"
 }
-export default ChineseKeys;
+export default SimplifiedChineseKeys;

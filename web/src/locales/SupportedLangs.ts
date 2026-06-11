@@ -1,8 +1,12 @@
 import EnglishKeys from "./enUS";
-import ChineseKeys from "./zhCN";
+import SimplifiedChineseKeys from "./zhCN";
+import TraditionalChineseKeys from "./zhTW";
 
 const SupportedLangs={
-    "en":EnglishKeys,
-    "zh":ChineseKeys
+    "en-US":EnglishKeys,
+    "zh-CN":SimplifiedChineseKeys,
+    "zh-TW":TraditionalChineseKeys,
+    "zh-HK":TraditionalChineseKeys,
+    "zh-MO":TraditionalChineseKeys
 }
 export default SupportedLangs;

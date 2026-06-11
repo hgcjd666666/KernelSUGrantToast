@@ -19,7 +19,7 @@ export default function AboutPage() {
             <div className="flex flex-col items-center">
                 <h3 className="text-2xl text-center">KernelSU Grant Toast</h3>
                 <span>{getLang("about.description")}</span>
-                <Button className="mt-2 w-[70%]" onClick={()=>{
+                <Button className="mt-2 w-[70%]" onClick={() => {
                     openUrl("https://github.com/NativeStar/KernelSUGrantToast")
                 }}>
                     <GitBranch />
@@ -34,7 +34,8 @@ export default function AboutPage() {
                         {
                             ProjectsList.map((item, index) =>
                                 // 只对中文用户展示部分项目 因为它们没有多语言支持且暂无计划(或实现太难)添加
-                                <TableRow hidden={language!=="zh"&&!item.hasI18n} key={index} onClick={() => {
+                                //港澳台应该看得懂简体
+                                <TableRow hidden={language === "en-US" && !item.hasI18n} key={index} onClick={() => {
                                     openUrl(item.url)
                                 }}>
                                     <TableCell className="whitespace-normal break-all">

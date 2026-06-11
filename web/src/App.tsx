@@ -6,7 +6,7 @@ import { useI18n } from "./hooks/useI18n";
 import { Toaster } from "@/components/ui/sonner";
 
 export function App() {
-  const [language, setLanguage] = useState<keyof typeof SupportedLangs>("en");
+  const [language, setLanguage] = useState<keyof typeof SupportedLangs>("en-US");
   //尽早初始化
   useI18n(language, setLanguage);
   return (
