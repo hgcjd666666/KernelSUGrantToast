@@ -6,6 +6,7 @@ const SimplifiedChineseKeys = {
     "text.ok": "确定",
     "text.cancel": "取消",
     "text.detail":"详情",
+    "text.followSystem": "跟随系统",
 
     "tabs.base": "基础",
     "tabs.ignorePackage": "忽略列表",
@@ -17,7 +18,6 @@ const SimplifiedChineseKeys = {
 
     "theme.label":"主题模式",
     "theme.select": "选择主题模式",
-    "theme.system": "跟随系统",
     "theme.light": "浅色",
     "theme.dark": "深色",
 

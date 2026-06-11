@@ -7,6 +7,7 @@ const TraditionalChineseKeys: typeof BaseLang = {
     "text.ok": "確定",
     "text.cancel": "取消",
     "text.detail": "詳細資訊",
+    "text.followSystem": "跟隨系統",
 
     "tabs.base": "基本",
     "tabs.ignorePackage": "忽略清單",
@@ -18,7 +19,6 @@ const TraditionalChineseKeys: typeof BaseLang = {
 
     "theme.label": "主題模式",
     "theme.select": "選擇主題模式",
-    "theme.system": "跟隨系統",
     "theme.light": "淺色",
     "theme.dark": "深色",
 

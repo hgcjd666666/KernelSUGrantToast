@@ -7,6 +7,7 @@ const EnglishKeys: typeof BaseLang = {
   "text.ok": "OK",
   "text.cancel": "Cancel",
   "text.detail": "Details",
+  "text.followSystem": "Follow System",
 
 
   "tabs.advanced": "Advanced",
@@ -21,7 +22,6 @@ const EnglishKeys: typeof BaseLang = {
   "theme.select": "Select Theme",
   "theme.dark": "Dark",
   "theme.light": "Light",
-  "theme.system": "Follow System",
 
   "toast.custom.title": "Custom Toast Message",
   "toast.custom.placeholder": "%s was granted Superuser rights",//Magisk提示原句 不要改
@@ -35,7 +35,7 @@ const EnglishKeys: typeof BaseLang = {
   "ignorePackage.delete.confirm.description": "Are you sure you want to remove this app from the ignore list?",
   "ignorePackage.add": "Add Application",
   "ignorePackage.add.dialog.description": "Click an app to add it",
-  "ignorePackage.add.dialog.search.placeholder":"Filter by app name or package name",
+  "ignorePackage.add.dialog.search.placeholder": "Filter by app name or package name",
   "ignorePackage.add.exist": "This application is already in the list",
 
   "advanced.warning": "Improper settings on this page may affect performance or cause malfunctions",
@@ -49,13 +49,13 @@ const EnglishKeys: typeof BaseLang = {
   "advanced.suCompat.description": "Only recommended if prompts are not shown properly",
   "advanced.suCompat.description.detail": "Some systems or apps trigger only this type of event, though this is rare. Enabling it may fix missing or non-functional prompts, but it also increases overhead.",
 
-  "about.description":"Show a root granted toast like Magisk",
-  "about.button.repository":"Project Repository",
-  "about.otherProjects.title":"Other Projects",
-  "about.otherProjects.description.kyouka":"A versatile browser extension that supports modifying web pages, intercepting calls, exporting data, and more",
-  "about.otherProjects.description.connector.windows":"Transfer files between phone and PC over a local network, forward notifications, and more (Windows side)",
-  "about.otherProjects.description.connector.android":"Transfer files and text between phone and PC over a local network, forward notifications, and more (Android side)",
-  "about.otherProjects.description.ruru":"A fork of a well-known app list detector, with stronger detection and support for custom target apps",
+  "about.description": "Show a root granted toast like Magisk",
+  "about.button.repository": "Project Repository",
+  "about.otherProjects.title": "Other Projects",
+  "about.otherProjects.description.kyouka": "A versatile browser extension that supports modifying web pages, intercepting calls, exporting data, and more",
+  "about.otherProjects.description.connector.windows": "Transfer files between phone and PC over a local network, forward notifications, and more (Windows side)",
+  "about.otherProjects.description.connector.android": "Transfer files and text between phone and PC over a local network, forward notifications, and more (Android side)",
+  "about.otherProjects.description.ruru": "A fork of a well-known app list detector, with stronger detection and support for custom target apps",
 
 }
 export default EnglishKeys;

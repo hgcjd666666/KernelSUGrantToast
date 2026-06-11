@@ -8,11 +8,15 @@ interface LanguageSelectProps {
     setLanguage: (language: keyof typeof SupportedLangs) => void;
 }
 export default function LanguageSelect({ languageContext, setLanguage }: LanguageSelectProps) {
-    const { getLang } = useI18n(languageContext);
+    const { getLang ,resetLanguage} = useI18n(languageContext);
     return (
         <>
             <Label htmlFor="languageSelect">{getLang("language.label")}</Label>
             <Select value={languageContext} onValueChange={(value => {
+                if (value==="system") {
+                    resetLanguage(setLanguage)
+                    return
+                }
                 setLanguage(value as keyof typeof SupportedLangs);
                 localStorage.setItem("language", value);
             })}>
@@ -22,6 +26,7 @@ export default function LanguageSelect({ languageContext, setLanguage }: Languag
                 <SelectContent id="languageSelect">
                     <SelectGroup>
                         <SelectLabel>{getLang("language.select")}</SelectLabel>
+                        <SelectItem value="system">{getLang("text.followSystem")}</SelectItem>
                         <SelectItem value="en-US">English</SelectItem>
                         <SelectItem value="zh-CN">简体中文</SelectItem>
                         <SelectItem value="zh-TW">繁體中文</SelectItem>

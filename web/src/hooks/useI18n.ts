@@ -21,9 +21,12 @@ export function useI18n(currentLanguage: SupportedLangsType, setContextLanguage?
         if (Reflect.has(SupportedLangs, currentLanguage)) {
             return SupportedLangs[currentLanguage][key] ?? "Unknown translate key";
         } else {
-            console.log("fall back", currentLanguage, key);
             return SupportedLangs["en-US"][key] ?? "Unknown translate key";
         }
     }, [currentLanguage]);
-    return { getLang }
+    const resetLanguage = useCallback((setLanguage: (language: keyof typeof SupportedLangs) => void) => {
+        localStorage.removeItem("language");
+        setLanguage(navigator.language as any);
+    }, []);
+    return { getLang, resetLanguage }
 }

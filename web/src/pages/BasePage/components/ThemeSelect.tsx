@@ -20,7 +20,7 @@ export default function ThemeSelect() {
                 <SelectContent id="themeSelect">
                     <SelectGroup>
                         <SelectLabel>{getLang("theme.select")}</SelectLabel>
-                        <SelectItem value="system">{getLang("theme.system")}</SelectItem>
+                        <SelectItem value="system">{getLang("text.followSystem")}</SelectItem>
                         <SelectItem value="light">{getLang("theme.light")}</SelectItem>
                         <SelectItem value="dark">{getLang("theme.dark")}</SelectItem>
                     </SelectGroup>
