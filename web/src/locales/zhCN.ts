@@ -15,6 +15,12 @@ const SimplifiedChineseKeys = {
     "language.label": "语言",
     "language.select": "选择语言",
 
+    "theme.label":"主题模式",
+    "theme.select": "选择主题模式",
+    "theme.system": "跟随系统",
+    "theme.light": "浅色",
+    "theme.dark": "深色",
+
     "toast.custom.title": "自定义提示消息",
     "toast.custom.placeholder": "%s 已被授予超级用户权限",
     "toast.custom.description": "须带有'%s'占位符用于显示应用名且长度小于64字符",

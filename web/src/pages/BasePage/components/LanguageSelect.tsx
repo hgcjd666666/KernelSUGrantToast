@@ -20,7 +20,7 @@ export default function LanguageSelect({ languageContext, setLanguage }: Languag
                     <SelectValue placeholder={getLang("language.select")} />
                 </SelectTrigger>
                 <SelectContent id="languageSelect">
-                    <SelectGroup defaultValue="en-US">
+                    <SelectGroup>
                         <SelectLabel>{getLang("language.select")}</SelectLabel>
                         <SelectItem value="en-US">English</SelectItem>
                         <SelectItem value="zh-CN">简体中文</SelectItem>

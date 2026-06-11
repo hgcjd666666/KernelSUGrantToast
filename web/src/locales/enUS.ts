@@ -17,6 +17,12 @@ const EnglishKeys: typeof BaseLang = {
   "language.label": "Language",
   "language.select": "Select Language",
 
+  "theme.label": "Theme",
+  "theme.select": "Select Theme",
+  "theme.dark": "Dark",
+  "theme.light": "Light",
+  "theme.system": "Follow System",
+
   "toast.custom.title": "Custom Toast Message",
   "toast.custom.placeholder": "%s was granted Superuser rights",//Magisk提示原句 不要改
   "toast.custom.description": "Must contain the '%s' placeholder and be fewer than 64 characters",

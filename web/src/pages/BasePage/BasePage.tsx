@@ -4,6 +4,7 @@ import { useContext } from "react";
 import LanguageSelect from "./components/LanguageSelect";
 import ToastTextInput from "./components/ToastTextInput";
 import { Separator } from "@/components/ui/separator";
+import ThemeSelect from "./components/ThemeSelect";
 interface BasePageProps {
     setLanguage: (language: keyof typeof SupportedLangs) => void;
 }
@@ -12,7 +13,8 @@ export default function BasePage({ setLanguage }: BasePageProps) {
     return (
         <div className="flex flex-col items-center">
             <LanguageSelect setLanguage={setLanguage} languageContext={languageContext} />
-            <Separator className="mt-5"/>
+            <ThemeSelect />
+            <Separator className="mt-5" />
             <ToastTextInput />
         </div>
     )
