@@ -28,7 +28,7 @@ public class Entry {
     private static PackageManager packageManager;
     //缓存应用名 避免每次都走PackageManager
     private static final LruCache<String, String> appNameCache = new LruCache<>(16);
-    private static String customToastText = "%s 已被授予超级用户权限";
+    private static String customToastText = Messages.getLocaleMessage();
     private static final HashSet<String> ignorePackageList = new HashSet<>();
 
     private static class TempArguments {
