@@ -27,7 +27,7 @@ public class Entry {
     private static Handler handler;
     private static PackageManager packageManager;
     //缓存应用名 避免每次都走PackageManager
-    private static final LruCache<String, String> appNameCache = new LruCache<>(16);
+    private static final LruCache<String, String> appNameCache = new LruCache<>(32);
     private static String customToastText = Messages.getLocaleMessage();
     private static final HashSet<String> ignorePackageList = new HashSet<>();
 
