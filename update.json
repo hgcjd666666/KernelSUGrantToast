@@ -1,6 +1,6 @@
 {
-  "version": "1.6",
-  "versionCode": 7,
-  "zipUrl": "https://github.com/NativeStar/KernelSUGrantToast/releases/download/1.6/KernelSUGrantToast.zip",
+  "version": "1.7",
+  "versionCode": 8,
+  "zipUrl": "https://github.com/KernelSU-Modules-Repo/ksuGrantToast/releases/download/v18/KernelSUGrantToast.zip",
   "changelog": "https://raw.githubusercontent.com/NativeStar/KernelSUGrantToast/master/change.md"
 }
