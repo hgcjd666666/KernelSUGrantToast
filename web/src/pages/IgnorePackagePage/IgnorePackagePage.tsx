@@ -13,7 +13,7 @@ import { toast } from "sonner";
 export default function IgnorePackagePage() {
     const languageContext = useContext(LanguageContext);
     const { getLang } = useI18n(languageContext);
-    const { getStringConfig, getPackageInfo, setConfig } = useKsu();
+    const { getStringConfig, getPackageInfo, setConfig, vibration } = useKsu();
     const [showAddApplicationDialog, setShowAddApplicationDialog] = useState(false);
     const [ignorePackages, setIgnorePackages] = useState<PackageInfo[]>([]);
 
@@ -27,11 +27,16 @@ export default function IgnorePackagePage() {
     }, []);
     return (
         <>
-            <AddApplicationDialog open={showAddApplicationDialog} onCancel={() => setShowAddApplicationDialog(false)} onAddApplication={async (pkgInfo) => {
-                if(ignorePackages.some(pkg => pkg.packageName === pkgInfo.packageName)){
+            <AddApplicationDialog open={showAddApplicationDialog} onCancel={() => {
+                vibration("KEY")
+                setShowAddApplicationDialog(false)
+            }} onAddApplication={async (pkgInfo) => {
+                if (ignorePackages.some(pkg => pkg.packageName === pkgInfo.packageName)) {
+                    vibration("TICK")
                     toast.warning(getLang("ignorePackage.add.exist"))
                     return
                 }
+                vibration("CONFIRM")
                 const newIgnoredPackages = [...ignorePackages, pkgInfo];
                 setIgnorePackages(newIgnoredPackages);
                 const result = await setConfig("ignorePackageNames", newIgnoredPackages.map(item => item.packageName).join(";"));
@@ -40,7 +45,10 @@ export default function IgnorePackagePage() {
             }} />
             <div className="flex flex-col h-full min-h-0 items-center text-center overflow-hidden">
                 <FieldDescription className="text-center shrink-0">{getLang("ignorePackage.tip")}</FieldDescription>
-                <Button className="w-[90%]" onClick={()=>setShowAddApplicationDialog(true)}>
+                <Button className="w-[90%]" onClick={() => {
+                    vibration("KEY")
+                    setShowAddApplicationDialog(true)
+                }}>
                     <CirclePlus />
                     {getLang("ignorePackage.add")}
                 </Button>

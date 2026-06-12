@@ -29,6 +29,10 @@ export default function AddApplicationDialog({ open, onAddApplication, onCancel 
     useEffect(() => {
         setSearchShowPackages(userPackages.filter(value => value.name.includes(searchValue) || value.packageName.includes(searchValue)));
     }, [searchValue]);
+    //防止第二次打开残留搜索内容
+    useEffect(() => {
+        setSearchValue("");
+    }, [open]);
     return (
         <Dialog open={open}>
             <DialogContent showCloseButton={false} className="max-h-[96vh] overflow-hidden">

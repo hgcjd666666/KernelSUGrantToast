@@ -1,6 +1,11 @@
 import { shellQuote } from "@/lib/utils";
-import { exec, listPackages, getPackagesInfo } from "kernelsu"
+import { exec, listPackages, getPackagesInfo, spawn } from "kernelsu"
 import { useCallback } from "react"
+const VibrationType = {
+    TICK: 20,
+    KEY: 45,
+    CONFIRM: 75
+}
 export function useKsu() {
     //TODO 发布前移除mock
     const mock = !Reflect.has(window, "ksu");
@@ -73,9 +78,13 @@ export function useKsu() {
             }
         }).filter(info => info.name !== undefined)
     }, []);
-    const openUrl = useCallback((url:string) => {
-        if(mock) return
+    const openUrl = useCallback((url: string) => {
+        if (mock) return
         exec(`am start -a android.intent.action.VIEW -c android.intent.category.BROWSABLE -d '${url}'`)
     }, []);
-    return { getStringConfig, getBooleanConfig, setConfig, deleteConfig, listAllPackages, getPackageInfo ,openUrl}
+    const vibration = useCallback(async (type: keyof typeof VibrationType) => {
+        if (mock) return
+        spawn(`cmd vibrator_manager synced oneshot ${VibrationType[type]}`)
+    }, []);
+    return { getStringConfig, getBooleanConfig, setConfig, deleteConfig, listAllPackages, getPackageInfo, openUrl, vibration }
 }

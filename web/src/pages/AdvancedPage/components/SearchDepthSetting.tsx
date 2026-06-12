@@ -15,14 +15,15 @@ export default function SearchDepthSetting() {
     const languageContext = useContext(LanguageContext);
     const { getLang } = useI18n(languageContext);
     const [depthValue, setDepthValue] = useState(1);
-    const { setConfig, getStringConfig, deleteConfig } = useKsu();
-    const [openDetailAlert,setOpenDetailAlert] = useState(false);
+    const { setConfig, getStringConfig, deleteConfig, vibration } = useKsu();
+    const [openDetailAlert, setOpenDetailAlert] = useState(false);
     useEffect(() => {
         getStringConfig("packageSearchDepth").then(depth => {
             depth && setDepthValue(parseInt(depth));
         })
     }, []);
     const saveDepth = useCallback(async () => {
+        vibration("KEY")
         //空值
         if (isNaN(depthValue)) {
             const result = await deleteConfig("packageSearchDepth");
@@ -39,7 +40,10 @@ export default function SearchDepthSetting() {
     }, [depthValue])
     return (
         <>
-            <Alert open={openDetailAlert} confirmText={getLang("text.ok")} description={getLang("advanced.searchDepth.description.detail")} onConfirm={()=>setOpenDetailAlert(false)} title={getLang("text.detail")} />
+            <Alert open={openDetailAlert} confirmText={getLang("text.ok")} description={getLang("advanced.searchDepth.description.detail")} onConfirm={() => {
+                vibration("KEY")
+                setOpenDetailAlert(false)
+            }} title={getLang("text.detail")} />
             <div className="flex flex-col mt-2 items-center">
                 <FieldLabel className="mt-2">{getLang("advanced.searchDepth.label")}</FieldLabel>
                 <ButtonGroup className="w-[70%]">
@@ -48,7 +52,10 @@ export default function SearchDepthSetting() {
                 </ButtonGroup>
                 <FieldDescription className="flex items-center">
                     {getLang("advanced.searchDepth.description")}
-                    <Badge variant="ghost" onClick={() => setOpenDetailAlert(true)}>
+                    <Badge variant="ghost" onClick={() => {
+                        vibration("TICK")
+                        setOpenDetailAlert(true)
+                    }}>
                         <CircleQuestionMark />
                     </Badge>
                 </FieldDescription>

@@ -18,11 +18,15 @@ interface IgnoredPackagesTableProps {
 export default function IgnoredPackagesTable({ ignoredPackages, setIgnorePackages }: IgnoredPackagesTableProps) {
     const languageContext = useContext(LanguageContext);
     const { getLang } = useI18n(languageContext);
-    const { setConfig } = useKsu();
+    const { setConfig, vibration } = useKsu();
     const [readyRemovePackage, setReadyRemovePackage] = useState<string | null>(null);
     return (
         <>
-            <Alert open={readyRemovePackage !== null} title={getLang("ignorePackage.delete.confirm.title")} cancelText={getLang("text.cancel")} confirmText={getLang("text.ok")} description={getLang("ignorePackage.delete.confirm.description")} onCancel={() => setReadyRemovePackage(null)} onConfirm={async () => {
+            <Alert open={readyRemovePackage !== null} title={getLang("ignorePackage.delete.confirm.title")} cancelText={getLang("text.cancel")} confirmText={getLang("text.ok")} description={getLang("ignorePackage.delete.confirm.description")} onCancel={() => {
+                vibration("TICK")
+                setReadyRemovePackage(null)
+            }} onConfirm={async () => {
+                vibration("KEY")
                 const newIgnoredPackages = ignoredPackages.filter(item => item.packageName !== readyRemovePackage);
                 setIgnorePackages(newIgnoredPackages);
                 const result = await setConfig("ignorePackageNames", newIgnoredPackages.map(item => item.packageName).join(";"));
@@ -42,6 +46,7 @@ export default function IgnoredPackagesTable({ ignoredPackages, setIgnorePackage
                                         </TableCell>
                                         <TableCell className="text-right w-10 whitespace-nowrap">
                                             <Button variant="ghost" size="icon" onClick={() => {
+                                                vibration("KEY")
                                                 setReadyRemovePackage(pkg.packageName)
                                             }}>
                                                 <Trash color="red" />

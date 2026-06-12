@@ -10,7 +10,7 @@ import { toast } from "sonner"
 export default function ToastTextInput() {
     const languageContext = useContext(LanguageContext);
     const { getLang } = useI18n(languageContext);
-    const { getStringConfig, setConfig, deleteConfig } = useKsu();
+    const { getStringConfig, setConfig, deleteConfig ,vibration} = useKsu();
     const [customToastText, setCustomToastText] = useState<string>("");
     useEffect(() => {
         getStringConfig("customToastText").then(text => {
@@ -18,6 +18,7 @@ export default function ToastTextInput() {
         })
     }, []);
     const saveMessage = useCallback(async () => {
+        vibration("KEY")
         if (customToastText === "") {
             const result = await deleteConfig("customToastText");
             result ? toast.success(getLang("toast.save.reset.success"), { description: getLang("text.reboot.tip") }) : toast.error(getLang("text.save.failed"))

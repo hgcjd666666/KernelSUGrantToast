@@ -1,6 +1,7 @@
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useI18n } from "@/hooks/useI18n";
+import { useKsu } from "@/hooks/useKsu";
 import type SupportedLangs from "@/locales/SupportedLangs";
 
 interface LanguageSelectProps {
@@ -9,17 +10,21 @@ interface LanguageSelectProps {
 }
 export default function LanguageSelect({ languageContext, setLanguage }: LanguageSelectProps) {
     const { getLang ,resetLanguage} = useI18n(languageContext);
+    const {vibration}=useKsu();
     return (
         <>
             <Label htmlFor="languageSelect">{getLang("language.label")}</Label>
             <Select value={languageContext} onValueChange={(value => {
+                vibration("KEY")
                 if (value==="system") {
                     resetLanguage(setLanguage)
                     return
                 }
                 setLanguage(value as keyof typeof SupportedLangs);
                 localStorage.setItem("language", value);
-            })}>
+            })} onOpenChange={(open)=>{
+                open&&vibration("TICK")
+            }}>
                 <SelectTrigger className="w-[90%] mt-1.5">
                     <SelectValue placeholder={getLang("language.select")} />
                 </SelectTrigger>
