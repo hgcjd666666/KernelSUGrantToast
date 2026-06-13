@@ -8,6 +8,7 @@ import type { PackageInfo } from "@/types";
 import { useContext, useEffect, useState } from "react";
 import { ApplicationView } from "./ApplicationView";
 import { Input } from "@/components/ui/input";
+import { CirclePlus } from "lucide-react";
 interface AddApplicationDialogProps {
     open: boolean
     onCancel: () => void
@@ -46,9 +47,16 @@ export default function AddApplicationDialog({ open, onAddApplication, onCancel 
                         <TableBody>
                             {
                                 searchShowPackages.map((pkg) => (
-                                    <TableRow key={pkg.packageName} onClick={() => onAddApplication(pkg)}>
-                                        <TableCell className="min-w-0" onClick={() => { }}>
+                                    <TableRow className="pointer-events-none" key={pkg.packageName}>
+                                        <TableCell className="min-w-0">
                                             <ApplicationView name={pkg.name} packageName={pkg.packageName} />
+                                        </TableCell>
+                                        <TableCell className="text-right w-10 whitespace-nowrap pointer-events-auto">
+                                            <Button variant="ghost" size="icon" onClick={() => {
+                                                onAddApplication(pkg);
+                                            }}>
+                                                <CirclePlus />
+                                            </Button>
                                         </TableCell>
                                     </TableRow>
                                 ))
