@@ -36,12 +36,12 @@ export default function AddApplicationDialog({ open, onAddApplication, onCancel 
     }, [open]);
     return (
         <Dialog open={open}>
-            <DialogContent showCloseButton={false} className="max-h-[96vh] overflow-hidden">
+            <DialogContent onOpenAutoFocus={(event) => event.preventDefault()} showCloseButton={false} className="max-h-[96vh] overflow-hidden">
                 <DialogHeader>
                     <DialogTitle>{getLang("ignorePackage.add")}</DialogTitle>
                     <DialogDescription>{getLang("ignorePackage.add.dialog.description")}</DialogDescription>
                 </DialogHeader>
-                <Input className="placeholder:text-sm" placeholder={getLang("ignorePackage.add.dialog.search.placeholder")} disabled={userPackages.length === 0} value={searchValue} onChange={e => setSearchValue(e.target.value)} />
+                <Input className="placeholder:text-sm" placeholder={getLang("ignorePackage.add.dialog.search.placeholder")} disabled={userPackages.length === 0} autoFocus={false} value={searchValue} onChange={e => setSearchValue(e.target.value)} />
                 <div className="max-h-[55vh] overflow-y-scroll no-scrollbar overscroll-none">
                     <Table className="table-fixed w-full">
                         <TableBody>
