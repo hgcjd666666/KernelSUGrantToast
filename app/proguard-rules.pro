@@ -19,3 +19,10 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+-keep class com.suisho.kernelsugranttoast.Entry {
+    public static void main(java.lang.String[]);
+    public static void jniOnNewSuEvent(java.lang.String);
+    private static void onNativeError(java.lang.String);
+    native <methods>;
+}
