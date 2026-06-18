@@ -50,7 +50,9 @@ jobs:
         working-directory: web
 
       - name: Build module
-        run: ./gradlew buildModule --no-daemon
+        run: |
+          chmod +x ./gradlew
+          ./gradlew buildModule --no-daemon
 
       - name: Upload module zip
         uses: actions/upload-artifact@v4
