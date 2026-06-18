@@ -110,7 +110,7 @@ public class Entry {
         if(packageManager == null) packageManager = systemContext.getPackageManager();
 
         //通过 uid 获取包名，非 Android 应用 uid 返回 null
-        String[] packages = packageManager.getNameForUid(uid);
+        String[] packages = packageManager.getPackagesForUid(uid);
         if(packages == null || packages.length == 0) return;
 
         for(String packageName : packages) {
