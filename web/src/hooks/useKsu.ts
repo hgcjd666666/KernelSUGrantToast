@@ -7,7 +7,6 @@ const VibrationType = {
     CONFIRM: 75
 }
 export function useKsu() {
-    //TODO 发布前移除mock
     const mock = !Reflect.has(window, "ksu");
     if (mock) {
         console.warn("ipc mocking!");

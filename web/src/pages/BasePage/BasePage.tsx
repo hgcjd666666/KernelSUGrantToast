@@ -5,6 +5,7 @@ import LanguageSelect from "./components/LanguageSelect";
 import ToastTextInput from "./components/ToastTextInput";
 import { Separator } from "@/components/ui/separator";
 import ThemeSelect from "./components/ThemeSelect";
+import AutoDeleteLogSetting from "./components/AutoDeleteLogSetting";
 interface BasePageProps {
     setLanguage: (language: keyof typeof SupportedLangs) => void;
 }
@@ -16,6 +17,8 @@ export default function BasePage({ setLanguage }: BasePageProps) {
             <ThemeSelect />
             <Separator className="mt-5" />
             <ToastTextInput />
+            <Separator className="mt-5" />
+            <AutoDeleteLogSetting />
         </div>
     )
 }
