@@ -3,7 +3,6 @@ import { LanguageContext } from "@/contexts/LanguageContext";
 import { useI18n } from "@/hooks/useI18n"
 import type SupportedLangs from "@/locales/SupportedLangs";
 import AboutPage from "@/pages/AboutPage/AboutPage";
-import AdvancedPage from "@/pages/AdvancedPage/AdvancedPage";
 import BasePage from "@/pages/BasePage/BasePage";
 import IgnorePackagePage from "@/pages/IgnorePackagePage/IgnorePackagePage";
 import { useContext } from "react";
@@ -18,7 +17,6 @@ export function Tab({setLanguage}:TabProps) {
             <TabsList variant="line">
                 <TabsTrigger value="base">{getLang("tabs.base")}</TabsTrigger>
                 <TabsTrigger value="ignorePackage">{getLang("tabs.ignorePackage")}</TabsTrigger>
-                <TabsTrigger value="advanced">{getLang("tabs.advanced")}</TabsTrigger>
                 <TabsTrigger value="about">{getLang("tabs.about")}</TabsTrigger>
             </TabsList>
             <TabsContent value="base">
@@ -26,9 +24,6 @@ export function Tab({setLanguage}:TabProps) {
             </TabsContent>
             <TabsContent value="ignorePackage" className="min-h-0">
                 <IgnorePackagePage/>
-            </TabsContent>
-            <TabsContent value="advanced">
-                <AdvancedPage/>
             </TabsContent>
             <TabsContent value="about">
                 <AboutPage/>

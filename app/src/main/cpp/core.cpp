@@ -16,14 +16,10 @@
 #define KSU_EVENT_TYPE_DROPPED 0xFFFFu
 #define KSU_SULOG_EVENT_ROOT_EXECVE 1u
 #define KSU_SULOG_EVENT_SUCOMPAT 2u
-static constexpr char ksudExec[] = "ksud";
 static JavaVM *jvm = nullptr;
 static jclass globalEntryClass = nullptr;
 static jmethodID onNewSuEventJavaMethod = nullptr;
-static std::map<uint32_t, time_t> toastedApplication;
-static std::map<uint32_t, time_t> ignoredProcess;
-static short packageSearchDepth = 1;
-static bool checkSuCompat = false;
+static std::map<uint32_t, time_t> toastedUidMap;
 
 struct __attribute__((packed)) EventRecordHeader {
     uint16_t record_type;
@@ -42,42 +38,19 @@ struct __attribute__((packed)) SulogEventHeader {
     uint32_t filename_len, argv_len;
 };
 
-void pushToastedApplicationMap(uint32_t pid, time_t timestamp) {
-    if (toastedApplication.size() > 4) {
-        toastedApplication.erase(toastedApplication.begin());
-    }
-    toastedApplication[pid] = timestamp;
-}
-
-void pushIgnoredProcessMap(uint32_t pid, time_t timestamp) {
-    if (ignoredProcess.size() > 8) {
-        ignoredProcess.erase(ignoredProcess.begin());
-    }
-    ignoredProcess[pid] = timestamp;
-}
-
-void processSuEvent(JNIEnv *threadJniEnv, uint32_t ppid) {
+void processSuEvent(JNIEnv *threadJniEnv, uint32_t uid) {
     time_t currentTime = time(nullptr);
-    //限制相同ppid
-    auto findPpidResult = ignoredProcess.find(ppid);
-    if (findPpidResult != ignoredProcess.end()) {
-        //相同ppid的请求每3秒最多处理一个
-        if (currentTime - findPpidResult->second <= 3) return;
+    //按 uid 限速，同一 uid 3 秒内只弹一次
+    auto findResult = toastedUidMap.find(uid);
+    if (findResult != toastedUidMap.end()) {
+        if (currentTime - findResult->second <= 3) return;
     }
-    pushIgnoredProcessMap(ppid, currentTime);
-    AndroidAppInfo appInfo = queryAndroidApplicationInfo(static_cast<pid_t>(ppid),
-                                                         packageSearchDepth);
-    if (appInfo.isAndroidApp && !appInfo.cmdline.empty()) {
-        auto findToastedApplicationResult = toastedApplication.find(appInfo.realPid);
-        if (findToastedApplicationResult != toastedApplication.end()) {
-            //是Android应用且拥有相同pid 提醒至少间隔5秒
-            if (currentTime - findToastedApplicationResult->second <= 5) return;
-        }
-        pushToastedApplicationMap(appInfo.realPid, currentTime);
-        jstring cmd = threadJniEnv->NewStringUTF(appInfo.cmdline.c_str());
-        threadJniEnv->CallStaticVoidMethod(globalEntryClass, onNewSuEventJavaMethod, cmd);
-        threadJniEnv->DeleteLocalRef(cmd);
+    if (toastedUidMap.size() > 16) {
+        toastedUidMap.erase(toastedUidMap.begin());
     }
+    toastedUidMap[uid] = currentTime;
+
+    threadJniEnv->CallStaticVoidMethod(globalEntryClass, onNewSuEventJavaMethod, (jint)uid);
 }
 
 void pollingLogEvent(int suLogFd) {
@@ -118,15 +91,10 @@ void pollingLogEvent(int suLogFd) {
                             auto *hdr = reinterpret_cast<SulogEventHeader *>(buf + off +
                                                                              sizeof(EventRecordHeader));
                             if (rec->payload_len >= sizeof(SulogEventHeader) && hdr->retval == 0) {
-//                              //只有这两个是来自第三方的调用 GRANT_ROOT是对管理器自动授权 不要处理
-//                              //绝大多数root获取都会走ksud
-                                if (hdr->event_type == KSU_SULOG_EVENT_ROOT_EXECVE) {
-                                    if (std::memcmp(ksudExec, hdr->comm, sizeof(ksudExec)) == 0)
-                                        processSuEvent(localJniEnv, hdr->ppid);
-                                //少数情况 给用户选择要不要开
-                                } else if (checkSuCompat &&
-                                           hdr->event_type == KSU_SULOG_EVENT_SUCOMPAT) {
-                                    processSuEvent(localJniEnv, hdr->ppid);
+                                //ROOT_EXECVE 和 SUCOMPAT 统一处理，uid 会在 Java 层过滤
+                                if (hdr->event_type == KSU_SULOG_EVENT_ROOT_EXECVE ||
+                                    hdr->event_type == KSU_SULOG_EVENT_SUCOMPAT) {
+                                    processSuEvent(localJniEnv, hdr->uid);
                                 }
                             }
                         }
@@ -169,7 +137,6 @@ bool handleSuLog() {
 }
 
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved) {
-    //保持权限
     JNIEnv *jniEnv;
     jvm = vm;
     vm->GetEnv(reinterpret_cast<void **>(&jniEnv), JNI_VERSION_1_6);
@@ -178,20 +145,16 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved) {
     jclass entryClass = jniEnv->FindClass("com/suisho/kernelsugranttoast/Entry");
     globalEntryClass = reinterpret_cast<jclass>(jniEnv->NewGlobalRef(entryClass));
     onNewSuEventJavaMethod = jniEnv->GetStaticMethodID(globalEntryClass, "jniOnNewSuEvent",
-                                                       "(Ljava/lang/String;)V");
+                                                       "(I)V");
     jniEnv->DeleteLocalRef(entryClass);
     return JNI_VERSION_1_6;
 }
 
 extern "C"
 JNIEXPORT jboolean JNICALL
-Java_com_suisho_kernelsugranttoast_Entry_jniInit(JNIEnv *env, jclass clazz, short searchDepth,
-                                                 jboolean checkCompat) {
-    packageSearchDepth = searchDepth;
-    checkSuCompat = checkCompat;
-    if (!utilInit()) return false;
+Java_com_suisho_kernelsugranttoast_Entry_jniInit(JNIEnv *env, jclass clazz) {
     if (!handleSuLog()) return false;
-    LOGI("JNI utilInit successful");
+    LOGI("JNI init successful");
     return true;
 }
 extern "C"

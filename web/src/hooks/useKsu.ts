@@ -7,18 +7,12 @@ const VibrationType = {
     CONFIRM: 75
 }
 export function useKsu() {
-    //TODO 发布前移除mock
     const mock = !Reflect.has(window, "ksu");
     if (mock) {
         console.warn("ipc mocking!");
     }
     const getStringConfig = useCallback(async (configKey: string) => {
-        if (mock) {
-            if (configKey === "packageSearchDepth") {
-                return "6"
-            }
-            return "mocking"
-        }
+        if (mock) return "mocking"
         const result = await exec(`export KSU_MODULE=ksuGrantToast&&/data/adb/ksud module config get ${configKey}`)
         if (result.errno !== 0) return null;
         return result.stdout
@@ -37,7 +31,7 @@ export function useKsu() {
     const deleteConfig = useCallback(async (configKey: string) => {
         if (mock) return true
         const result = await exec(`export KSU_MODULE=ksuGrantToast&&/data/adb/ksud module config delete ${configKey}`)
-        return result.errno === 0 || (result.errno === 1 && result.stderr === `Error: Key '${configKey}' not found in config`)
+        return result.errno === 0 || (result.errno === 1 && result.stderr === `Error: '${configKey}' not found in config`)
     }, []);
     const listAllPackages = useCallback(async () => {
         if (mock) {

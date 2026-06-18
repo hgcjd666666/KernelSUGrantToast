@@ -26,19 +26,9 @@ public class Entry {
     private static Context systemContext;
     private static Handler handler;
     private static PackageManager packageManager;
-    //缓存应用名 避免每次都走PackageManager
     private static final LruCache<String, String> appNameCache = new LruCache<>(32);
     private static String customToastText = Messages.getLocaleMessage();
     private static final HashSet<String> ignorePackageList = new HashSet<>();
-
-    private static class TempArguments {
-        public final short packageSearchDepth;
-        public final boolean checkSuCompat;
-        public TempArguments(short packageSearchDepth, boolean checkSuCompat) {
-            this.packageSearchDepth = packageSearchDepth;
-            this.checkSuCompat = checkSuCompat;
-        }
-    }
 
     @SuppressLint("UnsafeDynamicallyLoadedCode")
     public static void main(String[] args) {
@@ -47,7 +37,7 @@ public class Entry {
             return;
         }
         try {
-            var tmpArgs = parseArguments(args);
+            parseArguments(args);
             HiddenApiBypass.addHiddenApiExemptions("Landroid/app/ActivityThread;");
             if(Looper.getMainLooper() == null) Looper.prepareMainLooper();
             @SuppressLint("PrivateApi") Class<?> activityThreadClass = Class.forName("android.app.ActivityThread");
@@ -62,19 +52,14 @@ public class Entry {
                 System.exit(1);
                 return;
             }
-            //确定没有崩掉再加载
-            //app_process没法加载内置so
             System.load(libraryFile.getAbsolutePath());
-            if(!jniInit(tmpArgs.packageSearchDepth, tmpArgs.checkSuCompat)) {
+            if(!jniInit()) {
                 onInitFailed("Native init failed!");
                 System.exit(1);
                 return;
             }
             modifyModuleDescription(String.format(Locale.getDefault(), "✅Working.PID:%d,Ignored package(s) count:%d", Process.myPid(), ignorePackageList.size()));
-            //降权 不然就是java.lang.SecurityException: Package android is not owned by uid 0
-            //等写入描述完成才执行 系统框架没模块目录权限
             jniSetUid(1000);
-            //刚启动时不知道为啥占用会达到130MB 调用以加速回落
             System.gc();
             Log.i(TAG, "Init success!");
             Looper.loop();
@@ -82,7 +67,6 @@ public class Entry {
                  IllegalAccessException | PackageManager.NameNotFoundException |
                  RuntimeException e) {
             Log.e(TAG, "Failed to init!", e);
-            //重新提权 否则无法执行ksud
             jniSetUid(0);
             onInitFailed("Init failed!");
             systemContext = null;
@@ -90,10 +74,7 @@ public class Entry {
         }
     }
 
-    private static TempArguments parseArguments(String[] args) {
-        short packageSearchDepth = 1;
-        boolean checkSuCompat = false;
-        //自定义提示文本
+    private static void parseArguments(String[] args) {
         if(args.length > 0 && args[0] != null) {
             String tempCustomText = args[0];
             Log.i(TAG, "Found custom toast text");
@@ -118,30 +99,6 @@ public class Entry {
                 Log.w(TAG, "Invalid ignore package list");
             }
         }
-        if(args.length > 2 && args[2] != null) {
-            try {
-                short tempSearchDepth = Short.parseShort(args[2]);
-                Log.i(TAG, "Found custom package search depth");
-                if(tempSearchDepth >= 0 && tempSearchDepth < 33) {
-                    packageSearchDepth = tempSearchDepth;
-                    Log.i(TAG, "Set package search depth to " + tempSearchDepth);
-                } else {
-                    Log.w(TAG, "Invalid package search depth!");
-                }
-            } catch (NumberFormatException numberFormatException) {
-                Log.e(TAG, "Invalid package search depth!", numberFormatException);
-            }
-        }
-        if(args.length > 3 && args[3] != null) {
-            try {
-                Log.i(TAG, "Found check su compat setting");
-                checkSuCompat = Boolean.parseBoolean(args[3]);
-                Log.i(TAG, "Set check su compat to " + checkSuCompat);
-            } catch (NumberFormatException numberFormatException) {
-                Log.e(TAG, "Invalid check su compat!", numberFormatException);
-            }
-        }
-        return new TempArguments(packageSearchDepth, checkSuCompat);
     }
 
     private static void showToast(String pkgName) {
@@ -149,31 +106,31 @@ public class Entry {
         handler.post(() -> Toast.makeText(systemContext, String.format(Locale.getDefault(), customToastText, pkgName), Toast.LENGTH_SHORT).show());
     }
 
-    public static void jniOnNewSuEvent(String cmdline) {
+    public static void jniOnNewSuEvent(int uid) {
         if(packageManager == null) packageManager = systemContext.getPackageManager();
-        String packageName;
-        if(cmdline.contains(":")) {
-            int index = cmdline.indexOf(':');
-            packageName = cmdline.substring(0, index);
-        } else {
-            packageName = cmdline;
-        }
-        //忽略提示的包名
-        if(ignorePackageList.contains(packageName)) return;
-        try {
+
+        //通过 uid 获取包名，非 Android 应用 uid 返回 null
+        String[] packages = packageManager.getNameForUid(uid);
+        if(packages == null || packages.length == 0) return;
+
+        for(String packageName : packages) {
+            if(ignorePackageList.contains(packageName)) continue;
+
             String cachedAppName = appNameCache.get(packageName);
             if(cachedAppName != null) {
                 showToast(cachedAppName);
                 return;
             }
-            ApplicationInfo appInfo = packageManager.getApplicationInfo(packageName, 0);
-            String appName = appInfo.loadLabel(packageManager).toString();
-            appNameCache.put(packageName, appName);
-            showToast(appName);
-        } catch (PackageManager.NameNotFoundException e) {
-            Log.w(TAG, "Failed to get app info", e);
-        } catch (Exception e) {
-            Log.e(TAG, "Error on showing toast!", e);
+
+            try {
+                ApplicationInfo appInfo = packageManager.getApplicationInfo(packageName, 0);
+                String appName = appInfo.loadLabel(packageManager).toString();
+                appNameCache.put(packageName, appName);
+                showToast(appName);
+                return;
+            } catch (PackageManager.NameNotFoundException e) {
+                Log.w(TAG, "Failed to get app info for " + packageName, e);
+            }
         }
     }
 
@@ -188,7 +145,6 @@ public class Entry {
     }
 
     private static void modifyModuleDescription(String descText) {
-        //使用ksu特性临时更改描述
         try {
             File ksudFile = new File("/data/adb/ksud");
             if(!ksudFile.exists()) {
@@ -199,7 +155,6 @@ public class Entry {
             ProcessBuilder processBuilder = new ProcessBuilder("/data/adb/ksud", "module", "config", "set", "--temp", "override.description", desc);
             processBuilder.environment().put("KSU_MODULE", "ksuGrantToast");
             java.lang.Process changeDescriptorProcess = processBuilder.start();
-            //等待写入完成 方便降权
             changeDescriptorProcess.waitFor(20, TimeUnit.SECONDS);
             changeDescriptorProcess.destroyForcibly();
         } catch (IOException | InterruptedException e) {
@@ -207,7 +162,7 @@ public class Entry {
         }
     }
 
-    private static native boolean jniInit(short packageSearchDepth, boolean checkSuCompat);
+    private static native boolean jniInit();
 
     private static native void jniSetUid(int uid);
 }

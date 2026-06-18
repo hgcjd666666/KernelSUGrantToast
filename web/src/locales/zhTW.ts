@@ -11,7 +11,6 @@ const TraditionalChineseKeys: typeof BaseLang = {
 
     "tabs.base": "基本",
     "tabs.ignorePackage": "忽略清單",
-    "tabs.advanced": "進階",
     "tabs.about": "關於",
 
     "language.label": "語言",
@@ -36,18 +35,6 @@ const TraditionalChineseKeys: typeof BaseLang = {
     "ignorePackage.add.dialog.description": "點選應用程式項目以新增",
     "ignorePackage.add.dialog.search.placeholder": "依應用程式名稱或套件名稱篩選",
     "ignorePackage.add.exist": "此應用程式已在清單中",
-
-
-    "advanced.warning": "此頁面的設定若調整不當，可能影響效能或導致運作異常",
-    "advanced.searchDepth.reset.success": "已還原預設值",
-    "advanced.searchDepth.label": "應用程式套件搜尋深度",
-    "advanced.searchDepth.save.failed.invalid": "輸入數值無效，應介於0-32之間",
-    "advanced.searchDepth.description": "輸入值應介於0-32之間，預設值為1",
-    "advanced.searchDepth.description.detail": '過高會影響效能，過低可能導致某些提權資料被忽略。通常保持預設值已經足夠，除非你特別在意像「在 Termux 裡執行的 Codex 中執行了 su」這種極端情況',
-
-    "advanced.suCompat.label": "檢查 SuCompat 事件",
-    "advanced.suCompat.description": "僅建議在無法正常顯示提示時啟用",
-    "advanced.suCompat.description.detail": "部分系統或應用程式只會觸發此類型事件（極少出現這種情況），啟用後可能修復提示遺漏或失效，但會增加效能開銷",
 
     "about.description": "像 Magisk 一樣彈出授予超級使用者權限 Toast",
     "about.button.repository": "專案倉庫",
