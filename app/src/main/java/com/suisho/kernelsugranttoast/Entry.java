@@ -29,6 +29,7 @@ public class Entry {
     private static final LruCache<String, String> appNameCache = new LruCache<>(32);
     private static String customToastText = Messages.getLocaleMessage();
     private static final HashSet<String> ignorePackageList = new HashSet<>();
+    private static boolean autoDeleteLog = false;
 
     @SuppressLint("UnsafeDynamicallyLoadedCode")
     public static void main(String[] args) {
@@ -53,7 +54,7 @@ public class Entry {
                 return;
             }
             System.load(libraryFile.getAbsolutePath());
-            if(!jniInit()) {
+            if(!jniInit(autoDeleteLog)) {
                 onInitFailed("Native init failed!");
                 System.exit(1);
                 return;
@@ -97,6 +98,16 @@ public class Entry {
                 Log.i(TAG, "Added all ignore package");
             } else {
                 Log.w(TAG, "Invalid ignore package list");
+            }
+        }
+        //自动删除日志
+        if(args.length > 4 && args[4] != null) {
+            try {
+                Log.i(TAG, "Found auto delete log setting");
+                autoDeleteLog = Boolean.parseBoolean(args[4]);
+                Log.i(TAG, "Set auto delete log to " + autoDeleteLog);
+            } catch (NumberFormatException numberFormatException) {
+                Log.e(TAG, "Invalid auto delete log setting!", numberFormatException);
             }
         }
     }
@@ -162,7 +173,7 @@ public class Entry {
         }
     }
 
-    private static native boolean jniInit();
+    private static native boolean jniInit(boolean autoDeleteLog);
 
     private static native void jniSetUid(int uid);
 }

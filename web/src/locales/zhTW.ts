@@ -36,6 +36,9 @@ const TraditionalChineseKeys: typeof BaseLang = {
     "ignorePackage.add.dialog.search.placeholder": "依應用程式名稱或套件名稱篩選",
     "ignorePackage.add.exist": "此應用程式已在清單中",
 
+    "autoDeleteLog.label": "自動刪除日誌",
+    "autoDeleteLog.detail": "初始化完成後自動刪除啟動時產生的 SuLog 日誌，可避免日誌檔案堆積占用儲存空間，但可能不利於回報異常（這些日誌檔案可能有用）",
+
     "about.description": "像 Magisk 一樣彈出授予超級使用者權限 Toast",
     "about.button.repository": "專案倉庫",
     "about.otherProjects.title": "其他專案",

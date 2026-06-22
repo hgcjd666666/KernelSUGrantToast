@@ -20,6 +20,7 @@ static JavaVM *jvm = nullptr;
 static jclass globalEntryClass = nullptr;
 static jmethodID onNewSuEventJavaMethod = nullptr;
 static std::map<uint32_t, time_t> toastedUidMap;
+static bool autoDeleteLog = false;
 
 struct __attribute__((packed)) EventRecordHeader {
     uint16_t record_type;
@@ -132,7 +133,7 @@ bool handleSuLog() {
     }
     std::thread pollingThread(pollingLogEvent, suLogFd);
     pollingThread.detach();
-    deleteSuLogFile();
+    if (autoDeleteLog) deleteSuLogFile();
     return true;
 }
 
@@ -152,7 +153,8 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved) {
 
 extern "C"
 JNIEXPORT jboolean JNICALL
-Java_com_suisho_kernelsugranttoast_Entry_jniInit(JNIEnv *env, jclass clazz) {
+Java_com_suisho_kernelsugranttoast_Entry_jniInit(JNIEnv *env, jclass clazz, jboolean deleteLog) {
+    autoDeleteLog = deleteLog;
     if (!handleSuLog()) return false;
     LOGI("JNI init successful");
     return true;

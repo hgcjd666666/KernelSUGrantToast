@@ -36,6 +36,9 @@ const EnglishKeys: typeof BaseLang = {
   "ignorePackage.add.dialog.search.placeholder": "Filter by app name or package name",
   "ignorePackage.add.exist": "This application is already in the list",
 
+  "autoDeleteLog.label": "Auto-delete logs",
+  "autoDeleteLog.detail": "Automatically delete SuLog logs generated during startup after initialization is complete. This can prevent log files from piling up and taking up storage, but may make it harder to report issues because these log files may be useful.",
+
   "about.description": "Show a root granted toast like Magisk",
   "about.button.repository": "Project Repository",
   "about.otherProjects.title": "Other Projects",
