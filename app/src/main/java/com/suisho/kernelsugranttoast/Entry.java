@@ -118,30 +118,41 @@ public class Entry {
     }
 
     public static void jniOnNewSuEvent(int uid) {
+        //shell（uid 2000）申请 root 时直接显示 shell
+        if(uid == 2000) {
+            showToast("shell");
+            return;
+        }
+
         if(packageManager == null) packageManager = systemContext.getPackageManager();
 
         //通过 uid 获取包名，非 Android 应用 uid 返回 null
         String[] packages = packageManager.getPackagesForUid(uid);
         if(packages == null || packages.length == 0) return;
 
+        //共享 uid 的应用（如 Termux 和插件）会返回多个包名，选最短的（主应用）
+        String targetPackage = null;
         for(String packageName : packages) {
             if(ignorePackageList.contains(packageName)) continue;
-
-            String cachedAppName = appNameCache.get(packageName);
-            if(cachedAppName != null) {
-                showToast(cachedAppName);
-                return;
+            if(targetPackage == null || packageName.length() < targetPackage.length()) {
+                targetPackage = packageName;
             }
+        }
+        if(targetPackage == null) return;
 
-            try {
-                ApplicationInfo appInfo = packageManager.getApplicationInfo(packageName, 0);
-                String appName = appInfo.loadLabel(packageManager).toString();
-                appNameCache.put(packageName, appName);
-                showToast(appName);
-                return;
-            } catch (PackageManager.NameNotFoundException e) {
-                Log.w(TAG, "Failed to get app info for " + packageName, e);
-            }
+        String cachedAppName = appNameCache.get(targetPackage);
+        if(cachedAppName != null) {
+            showToast(cachedAppName);
+            return;
+        }
+
+        try {
+            ApplicationInfo appInfo = packageManager.getApplicationInfo(targetPackage, 0);
+            String appName = appInfo.loadLabel(packageManager).toString();
+            appNameCache.put(targetPackage, appName);
+            showToast(appName);
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.w(TAG, "Failed to get app info for " + targetPackage, e);
         }
     }
 
