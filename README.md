@@ -1,8 +1,13 @@
 # KernelSU Grant Toast
 ##### 让KernelSU像Magisk一样弹出'授予超级用户权限' Toast
+### 与原版的区别
+本分支基于 [NativeStar/KernelSUGrantToast](https://github.com/NativeStar/KernelSUGrantToast)，修改如下：
+- **改用 uid 判断**：原版通过遍历 /proc 回溯 ppid 获取应用名，改为通过 `getPackagesForUid` 直接获取，更高效？（至少不用追它的父进程了）
+- **shell 提权提示**：shell（adb 等）申请 root 权限时同样会弹出 Toast，显示 "shell"（或许可以防止横向提权？比如你给了setuid权限）
 ### 截图
 ![](./mdAssets/1000132279.png)
 ![](./mdAssets/1000130680.png)
+![](./mdAssets/Screenshot_2026-06-23-12-30-38-50_com.termux~2.png)
 ### 功能
 - 在应用提权时弹出Toast提醒
 - 支持自定义提醒文本
