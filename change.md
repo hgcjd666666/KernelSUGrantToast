@@ -1,3 +1,7 @@
+### 1.9
+修复在最新版本KernelSU(32525)上无法工作
+
+改为基于应用UID获取提权数据 感谢[@hgcjd666666](https://github.com/NativeStar/KernelSUGrantToast/pull/8)
 ### 1.8
 WebUI:
 
