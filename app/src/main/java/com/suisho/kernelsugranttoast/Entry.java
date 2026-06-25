@@ -35,7 +35,8 @@ public class Entry {
         public final short packageSearchDepth;
         public final boolean checkSuCompat;
         public final boolean autoDeleteLog;
-        public TempArguments(short packageSearchDepth, boolean checkSuCompat,boolean autoDeleteLog) {
+
+        public TempArguments(short packageSearchDepth, boolean checkSuCompat, boolean autoDeleteLog) {
             this.packageSearchDepth = packageSearchDepth;
             this.checkSuCompat = checkSuCompat;
             this.autoDeleteLog = autoDeleteLog;
@@ -67,7 +68,7 @@ public class Entry {
             //确定没有崩掉再加载
             //app_process没法加载内置so
             System.load(libraryFile.getAbsolutePath());
-            if(!jniInit(tmpArgs.packageSearchDepth, tmpArgs.checkSuCompat,tmpArgs.autoDeleteLog)) {
+            if(!jniInit(tmpArgs.packageSearchDepth, tmpArgs.checkSuCompat, tmpArgs.autoDeleteLog)) {
                 onInitFailed("Native init failed!");
                 System.exit(1);
                 return;
@@ -95,7 +96,7 @@ public class Entry {
     private static TempArguments parseArguments(String[] args) {
         short packageSearchDepth = 1;
         boolean checkSuCompat = false;
-        boolean autoDeleteLog=false;
+        boolean autoDeleteLog = false;
         //自定义提示文本
         if(args.length > 0 && args[0] != null) {
             String tempCustomText = args[0];
@@ -153,7 +154,7 @@ public class Entry {
                 Log.i(TAG, "Found auto delete log setting");
                 autoDeleteLog = Boolean.parseBoolean(args[4]);
                 Log.i(TAG, "Set auto delete log to " + autoDeleteLog);
-            }catch (NumberFormatException numberFormatException) {
+            } catch (NumberFormatException numberFormatException) {
                 Log.e(TAG, "Invalid auto delete log setting!", numberFormatException);
             }
         }
@@ -165,7 +166,7 @@ public class Entry {
         handler.post(() -> Toast.makeText(systemContext, String.format(Locale.getDefault(), customToastText, pkgName), Toast.LENGTH_SHORT).show());
     }
 
-    public static void jniOnNewSuEvent(String cmdline) {
+    public static void jniOnFallbackSuEvent(String cmdline) {
         if(packageManager == null) packageManager = systemContext.getPackageManager();
         String packageName;
         if(cmdline.contains(":")) {
@@ -182,6 +183,35 @@ public class Entry {
                 showToast(cachedAppName);
                 return;
             }
+            ApplicationInfo appInfo = packageManager.getApplicationInfo(packageName, 0);
+            String appName = appInfo.loadLabel(packageManager).toString();
+            appNameCache.put(packageName, appName);
+            showToast(appName);
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.w(TAG, "Failed to get app info", e);
+        } catch (Exception e) {
+            Log.e(TAG, "Error on showing toast!", e);
+        }
+    }
+
+    public static void jniOnNewSuEvent(int uid,int ppid) {
+        if(packageManager == null) packageManager = systemContext.getPackageManager();
+        try {
+            String[] appsList = packageManager.getPackagesForUid(uid);
+            if(appsList == null || appsList.length == 0) {
+                Log.i(TAG, "No package found for uid " + uid);
+                return;
+            }
+            //sharedUserId处理
+            if(appsList.length > 1) {
+                //读取proc需要提权
+                jniSetUid(0);
+                jniProcessSharedUidApplication(ppid);
+                return;
+            }
+            String packageName = appsList[0];
+            //忽略提示的包名
+            if(ignorePackageList.contains(packageName)) return;
             ApplicationInfo appInfo = packageManager.getApplicationInfo(packageName, 0);
             String appName = appInfo.loadLabel(packageManager).toString();
             appNameCache.put(packageName, appName);
@@ -223,7 +253,8 @@ public class Entry {
         }
     }
 
-    private static native boolean jniInit(short packageSearchDepth, boolean checkSuCompat,boolean autoDeleteLog);
+    private static native boolean jniInit(short packageSearchDepth, boolean checkSuCompat, boolean autoDeleteLog);
 
     private static native void jniSetUid(int uid);
+    private static native void jniProcessSharedUidApplication(int ppid);
 }

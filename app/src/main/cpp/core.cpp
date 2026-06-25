@@ -16,15 +16,16 @@
 #define KSU_EVENT_TYPE_DROPPED 0xFFFFu
 #define KSU_SULOG_EVENT_ROOT_EXECVE 1u
 #define KSU_SULOG_EVENT_SUCOMPAT 2u
-static constexpr char ksudExec[] = "ksud";
 static JavaVM *jvm = nullptr;
 static jclass globalEntryClass = nullptr;
+static jmethodID onFallbackSuEventJavaMethod = nullptr;
 static jmethodID onNewSuEventJavaMethod = nullptr;
 static std::map<uint32_t, time_t> toastedApplication;
 static std::map<uint32_t, time_t> ignoredProcess;
+static std::map<uint32_t, time_t> ignoredUid;
 static short packageSearchDepth = 1;
 static bool checkSuCompat = false;
-static bool autoDeleteLog= false;
+static bool autoDeleteLog = false;
 
 struct __attribute__((packed)) EventRecordHeader {
     uint16_t record_type;
@@ -57,28 +58,28 @@ void pushIgnoredProcessMap(uint32_t pid, time_t timestamp) {
     ignoredProcess[pid] = timestamp;
 }
 
-void processSuEvent(JNIEnv *threadJniEnv, uint32_t ppid) {
+void pushIgnoredUidMap(uint32_t pid, time_t timestamp) {
+    if (ignoredUid.size() > 8) {
+        ignoredUid.erase(ignoredUid.begin());
+    }
+    ignoredUid[pid] = timestamp;
+}
+
+//对于有sharedUserId的应用 靠uid判断具体提权是不稳定的 需要回退到老逻辑
+//TODO 移除ppid或包名限流 因为这种应用并不多
+void processSharedUidApplicationSuEvent(JNIEnv *threadJniEnv, uint32_t ppid) {
+
+}
+
+void processSuEvent(JNIEnv *threadJniEnv, uint32_t uid, uint32_t ppid) {
     time_t currentTime = time(nullptr);
-    //限制相同ppid
-    auto findPpidResult = ignoredProcess.find(ppid);
-    if (findPpidResult != ignoredProcess.end()) {
-        //相同ppid的请求每3秒最多处理一个
-        if (currentTime - findPpidResult->second <= 3) return;
+    auto findUidResult = ignoredUid.find(uid);
+    if (findUidResult != ignoredUid.end()) {
+        if (currentTime - findUidResult->second <= 3) return;
     }
-    pushIgnoredProcessMap(ppid, currentTime);
-    AndroidAppInfo appInfo = queryAndroidApplicationInfo(static_cast<pid_t>(ppid),
-                                                         packageSearchDepth);
-    if (appInfo.isAndroidApp && !appInfo.cmdline.empty()) {
-        auto findToastedApplicationResult = toastedApplication.find(appInfo.realPid);
-        if (findToastedApplicationResult != toastedApplication.end()) {
-            //是Android应用且拥有相同pid 提醒至少间隔5秒
-            if (currentTime - findToastedApplicationResult->second <= 5) return;
-        }
-        pushToastedApplicationMap(appInfo.realPid, currentTime);
-        jstring cmd = threadJniEnv->NewStringUTF(appInfo.cmdline.c_str());
-        threadJniEnv->CallStaticVoidMethod(globalEntryClass, onNewSuEventJavaMethod, cmd);
-        threadJniEnv->DeleteLocalRef(cmd);
-    }
+    pushIgnoredUidMap(uid, currentTime);
+    threadJniEnv->CallStaticVoidMethod(globalEntryClass, onNewSuEventJavaMethod,
+                                       static_cast<int>(uid), static_cast<int>(ppid));
 }
 
 void pollingLogEvent(int suLogFd) {
@@ -118,17 +119,23 @@ void pollingLogEvent(int suLogFd) {
                         if (rec->record_type != KSU_EVENT_TYPE_DROPPED) {
                             auto *hdr = reinterpret_cast<SulogEventHeader *>(buf + off +
                                                                              sizeof(EventRecordHeader));
-                            if (rec->payload_len >= sizeof(SulogEventHeader) && hdr->retval == 0) {
+                            if (rec->payload_len >= sizeof(SulogEventHeader) && hdr->uid != 0 &&
+                                hdr->retval == 0) {
+                                //TODO 移除suCompat检查开关 现在必须检查这个事件
 //                              //只有这两个是来自第三方的调用 GRANT_ROOT是对管理器自动授权 不要处理
 //                              //绝大多数root获取都会走ksud
-                                if (hdr->event_type == KSU_SULOG_EVENT_ROOT_EXECVE) {
-                                    if (std::memcmp(ksudExec, hdr->comm, sizeof(ksudExec)) == 0)
-                                        processSuEvent(localJniEnv, hdr->ppid);
-                                //少数情况 给用户选择要不要开
-                                } else if (checkSuCompat &&
-                                           hdr->event_type == KSU_SULOG_EVENT_SUCOMPAT) {
-                                    processSuEvent(localJniEnv, hdr->ppid);
+                                if (hdr->event_type == KSU_SULOG_EVENT_ROOT_EXECVE ||
+                                    hdr->event_type == KSU_SULOG_EVENT_SUCOMPAT) {
+                                    processSuEvent(localJniEnv, hdr->uid, hdr->ppid);
                                 }
+//                                if (hdr->event_type == KSU_SULOG_EVENT_ROOT_EXECVE) {
+//                                    if (std::memcmp(ksudExec, hdr->comm, sizeof(ksudExec)) == 0)
+//                                        processSuEvent(localJniEnv, hdr->ppid);
+//                                //少数情况 给用户选择要不要开
+//                                } else if (checkSuCompat &&
+//                                           hdr->event_type == KSU_SULOG_EVENT_SUCOMPAT) {
+//                                    processSuEvent(localJniEnv, hdr->ppid);
+//                                }
                             }
                         }
                         off += frame;
@@ -178,8 +185,11 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved) {
     vm->GetEnv(reinterpret_cast<void **>(&jniEnv), JNI_VERSION_1_6);
     jclass entryClass = jniEnv->FindClass("com/suisho/kernelsugranttoast/Entry");
     globalEntryClass = reinterpret_cast<jclass>(jniEnv->NewGlobalRef(entryClass));
+    onFallbackSuEventJavaMethod = jniEnv->GetStaticMethodID(globalEntryClass,
+                                                            "jniOnFallbackSuEvent",
+                                                            "(Ljava/lang/String;)V");
     onNewSuEventJavaMethod = jniEnv->GetStaticMethodID(globalEntryClass, "jniOnNewSuEvent",
-                                                       "(Ljava/lang/String;)V");
+                                                       "(II)V");
     jniEnv->DeleteLocalRef(entryClass);
     return JNI_VERSION_1_6;
 }
@@ -187,7 +197,7 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved) {
 extern "C"
 JNIEXPORT jboolean JNICALL
 Java_com_suisho_kernelsugranttoast_Entry_jniInit(JNIEnv *env, jclass clazz, short searchDepth,
-                                                 jboolean checkCompat,jboolean deleteLog) {
+                                                 jboolean checkCompat, jboolean deleteLog) {
     packageSearchDepth = searchDepth;
     checkSuCompat = checkCompat;
     autoDeleteLog = deleteLog;
@@ -200,4 +210,41 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_com_suisho_kernelsugranttoast_Entry_jniSetUid(JNIEnv *env, jclass clazz, jint uid) {
     setresuid(uid, uid, 0);
+}
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_suisho_kernelsugranttoast_Entry_jniProcessSharedUidApplication(JNIEnv *threadJniEnv,
+                                                                        jclass clazz,
+                                                                        jint ppid) {
+    time_t currentTime = time(nullptr);
+    //限制相同ppid
+    auto findPpidResult = ignoredProcess.find(ppid);
+    if (findPpidResult != ignoredProcess.end()) {
+        //相同ppid的请求每3秒最多处理一个
+        if (currentTime - findPpidResult->second <= 3) {
+            LOGI("return by ppid");
+            //避免toast无法显示
+            setresuid(1000, 1000, 0);
+            return;
+        }
+    }
+    pushIgnoredProcessMap(ppid, currentTime);
+    AndroidAppInfo appInfo = queryAndroidApplicationInfo(static_cast<pid_t>(ppid),
+                                                         packageSearchDepth);
+    //TODO 这里应该能优化下 晚点再搞了 先抢救新版本用不了
+    if (appInfo.isAndroidApp && !appInfo.cmdline.empty()) {
+        auto findToastedApplicationResult = toastedApplication.find(appInfo.realPid);
+        if (findToastedApplicationResult != toastedApplication.end()) {
+            //是Android应用且拥有相同pid 提醒至少间隔5秒
+            if (currentTime - findToastedApplicationResult->second <= 5) {
+                setresuid(1000, 1000, 0);
+                return;
+            }
+        }
+        pushToastedApplicationMap(appInfo.realPid, currentTime);
+        jstring cmd = threadJniEnv->NewStringUTF(appInfo.cmdline.c_str());
+        threadJniEnv->CallStaticVoidMethod(globalEntryClass, onFallbackSuEventJavaMethod, cmd);
+        threadJniEnv->DeleteLocalRef(cmd);
+    }
+    setresuid(1000, 1000, 0);
 }
