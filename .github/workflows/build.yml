@@ -49,8 +49,13 @@ jobs:
 
       - name: Fill version placeholders
         run: |
-          VERSION_CODE=$(echo "${{ github.ref_name }}" | sed 's/.*\.//')
-          sed -i "s/@VERSION@/${{ github.ref_name }}/g" module/module.prop
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            VERSION="${{ github.ref_name }}"
+          else
+            VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "unknown")
+          fi
+          VERSION_CODE=$(echo "$VERSION" | sed 's/.*\.//')
+          sed -i "s/@VERSION@/$VERSION/g" module/module.prop
           sed -i "s/@VERSION_CODE@/$VERSION_CODE/g" module/module.prop
 
       - name: Build module
