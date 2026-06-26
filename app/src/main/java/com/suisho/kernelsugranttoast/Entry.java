@@ -81,7 +81,7 @@ public class Entry {
         } catch (Throwable e) {
             Log.e(TAG, "Failed to init!", e);
             //重新提权 否则无法执行ksud
-            if(Process.myUid() !=0) {
+            if(Process.myUid() != 0) {
                 jniSetUid(0);
             }
             onInitFailed("Init failed!");
@@ -175,13 +175,13 @@ public class Entry {
             showToast(appName);
         } catch (PackageManager.NameNotFoundException e) {
             Log.w(TAG, "Failed to get app info", e);
-        } catch (Exception|Error e) {
+        } catch (Exception | Error e) {
             Log.e(TAG, "Error on showing toast!", e);
             onFatalException("Error on showing toast!");
         }
     }
 
-    public static void jniOnNewSuEvent(int uid,int ppid) {
+    public static void jniOnNewSuEvent(int uid, int ppid) {
         if(packageManager == null) packageManager = systemContext.getPackageManager();
         try {
             String[] appsList = packageManager.getPackagesForUid(uid);
@@ -199,13 +199,18 @@ public class Entry {
             String packageName = appsList[0];
             //忽略提示的包名
             if(ignorePackageList.contains(packageName)) return;
+            String cachedAppName = appNameCache.get(packageName);
+            if(cachedAppName != null) {
+                showToast(cachedAppName);
+                return;
+            }
             ApplicationInfo appInfo = packageManager.getApplicationInfo(packageName, 0);
             String appName = appInfo.loadLabel(packageManager).toString();
             appNameCache.put(packageName, appName);
             showToast(appName);
         } catch (PackageManager.NameNotFoundException e) {
             Log.w(TAG, "Failed to get app info", e);
-        } catch (Exception|Error e) {
+        } catch (Exception | Error e) {
             Log.e(TAG, "Error on showing toast!", e);
             onFatalException("Error on showing toast!");
         }
@@ -244,5 +249,6 @@ public class Entry {
     private static native boolean jniInit(short packageSearchDepth, boolean autoDeleteLog);
 
     private static native void jniSetUid(int uid);
+
     private static native void jniProcessSharedUidApplication(int ppid);
 }
