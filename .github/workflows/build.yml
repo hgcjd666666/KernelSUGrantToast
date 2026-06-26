@@ -70,8 +70,13 @@ jobs:
           name: KernelSUGrantToast
           path: tempOutput/KernelSUGrantToast/
 
+      - name: Zip module
+        run: |
+          cd tempOutput/KernelSUGrantToast
+          zip -r ../KernelSUGrantToast.zip .
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          files: tempOutput/KernelSUGrantToast/KernelSUGrantToast.zip
+          files: tempOutput/KernelSUGrantToast.zip
           generate_release_notes: true
