@@ -23,7 +23,7 @@
 -keep class com.suisho.kernelsugranttoast.Entry {
     public static void main(java.lang.String[]);
     public static void jniOnFallbackSuEvent(java.lang.String);
-    private static void onNativeError(java.lang.String);
+    private static void onFatalException(java.lang.String);
     public static void jniOnNewSuEvent(int,int);
     native <methods>;
 }

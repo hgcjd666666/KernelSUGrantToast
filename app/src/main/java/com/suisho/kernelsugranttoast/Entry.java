@@ -15,7 +15,6 @@ import org.lsposed.hiddenapibypass.HiddenApiBypass;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
@@ -79,12 +78,12 @@ public class Entry {
             System.gc();
             Log.i(TAG, "Init success!");
             Looper.loop();
-        } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException |
-                 IllegalAccessException | PackageManager.NameNotFoundException |
-                 RuntimeException e) {
+        } catch (Throwable e) {
             Log.e(TAG, "Failed to init!", e);
             //重新提权 否则无法执行ksud
-            jniSetUid(0);
+            if(Process.myUid() !=0) {
+                jniSetUid(0);
+            }
             onInitFailed("Init failed!");
             systemContext = null;
             System.exit(1);
@@ -176,8 +175,9 @@ public class Entry {
             showToast(appName);
         } catch (PackageManager.NameNotFoundException e) {
             Log.w(TAG, "Failed to get app info", e);
-        } catch (Exception e) {
+        } catch (Exception|Error e) {
             Log.e(TAG, "Error on showing toast!", e);
+            onFatalException("Error on showing toast!");
         }
     }
 
@@ -205,8 +205,9 @@ public class Entry {
             showToast(appName);
         } catch (PackageManager.NameNotFoundException e) {
             Log.w(TAG, "Failed to get app info", e);
-        } catch (Exception e) {
+        } catch (Exception|Error e) {
             Log.e(TAG, "Error on showing toast!", e);
+            onFatalException("Error on showing toast!");
         }
     }
 
@@ -214,7 +215,7 @@ public class Entry {
         modifyModuleDescription("❌" + errorMessage);
     }
 
-    private static void onNativeError(String msg) {
+    private static void onFatalException(String msg) {
         jniSetUid(0);
         modifyModuleDescription("❌" + msg);
         System.exit(1);

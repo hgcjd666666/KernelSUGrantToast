@@ -120,21 +120,12 @@ void pollingLogEvent(int suLogFd) {
                                                                              sizeof(EventRecordHeader));
                             if (rec->payload_len >= sizeof(SulogEventHeader) && hdr->uid != 0 &&
                                 hdr->retval == 0) {
-                                //TODO 移除suCompat检查开关 现在必须检查这个事件
 //                              //只有这两个是来自第三方的调用 GRANT_ROOT是对管理器自动授权 不要处理
 //                              //绝大多数root获取都会走ksud
                                 if (hdr->event_type == KSU_SULOG_EVENT_ROOT_EXECVE ||
                                     hdr->event_type == KSU_SULOG_EVENT_SUCOMPAT) {
                                     processSuEvent(localJniEnv, hdr->uid, hdr->ppid);
                                 }
-//                                if (hdr->event_type == KSU_SULOG_EVENT_ROOT_EXECVE) {
-//                                    if (std::memcmp(ksudExec, hdr->comm, sizeof(ksudExec)) == 0)
-//                                        processSuEvent(localJniEnv, hdr->ppid);
-//                                //少数情况 给用户选择要不要开
-//                                } else if (checkSuCompat &&
-//                                           hdr->event_type == KSU_SULOG_EVENT_SUCOMPAT) {
-//                                    processSuEvent(localJniEnv, hdr->ppid);
-//                                }
                             }
                         }
                         off += frame;
@@ -148,7 +139,7 @@ void pollingLogEvent(int suLogFd) {
     close(epfd);
     close(suLogFd);
     jmethodID modifyModuleDescriptionMethod = localJniEnv->GetStaticMethodID(globalEntryClass,
-                                                                             "onNativeError",
+                                                                             "onFatalException",
                                                                              "(Ljava/lang/String;)V");
     jstring description = localJniEnv->NewStringUTF("Error on working,Exited");
     localJniEnv->CallStaticVoidMethod(globalEntryClass, modifyModuleDescriptionMethod, description);
