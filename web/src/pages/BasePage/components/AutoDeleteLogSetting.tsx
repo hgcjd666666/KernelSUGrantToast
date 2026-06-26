@@ -37,6 +37,10 @@ export default function AutoDeleteLogSetting() {
                     <Switch onClick={onSwitchChange} checked={autoDeleteLog} id="autoDeleteLog" />
                     <Label htmlFor="autoDeleteLog">{getLang("autoDeleteLog.label")}
                         <Badge variant="ghost" onClick={(e) => {
+<<<<<<< HEAD
+=======
+                            //避免点击帮助按钮时触发click事件
+>>>>>>> upstream/master
                             e.preventDefault();
                             e.stopPropagation();
                             vibration("TICK")
@@ -49,4 +53,8 @@ export default function AutoDeleteLogSetting() {
             </div>
         </>
     )
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> upstream/master

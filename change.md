@@ -1,3 +1,19 @@
+### 1.9
+修复在最新版本KernelSU(32525)上无法工作
+
+改为基于应用UID获取提权数据 感谢[@hgcjd666666](https://github.com/NativeStar/KernelSUGrantToast/pull/8)
+### 1.8
+WebUI:
+
+修复应用列表项长按时误触发振动
+
+修复打开添加应用对话框时自动弹出输入法
+
+其他:
+
+支持设置是否在启动后删除启动时生成的SuLog日志文件
+
+开启r8
 ### 1.7
 改用基于Shadcn的全新WebUI界面 支持多语言、深色模式等
 
