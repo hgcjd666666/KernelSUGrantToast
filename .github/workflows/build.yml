@@ -47,6 +47,12 @@ jobs:
         run: pnpm install --frozen-lockfile
         working-directory: web
 
+      - name: Fill version placeholders
+        run: |
+          VERSION_CODE=$(echo "${{ github.ref_name }}" | sed 's/.*\.//')
+          sed -i "s/@VERSION@/${{ github.ref_name }}/g" module/module.prop
+          sed -i "s/@VERSION_CODE@/$VERSION_CODE/g" module/module.prop
+
       - name: Build module
         run: |
           chmod +x ./gradlew
