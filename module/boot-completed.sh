@@ -13,6 +13,5 @@ fi
 customToastText="$($KSUD module config get customToastText)"
 ignoredPackages="$($KSUD module config get ignorePackageNames)"
 packageSearchDepth="$($KSUD module config get packageSearchDepth)"
-useSuCompat="$($KSUD module config get checkSuCompat)"
 autoDeleteLog="$($KSUD module config get autoDeleteLog)"
-exec /system/bin/app_process -Djava.class.path=./daemon.dex / --nice-name=SuToaster com.suisho.kernelsugranttoast.Entry "$customToastText" "$ignoredPackages" "$packageSearchDepth" "$useSuCompat" "$autoDeleteLog"
+exec /system/bin/app_process -Djava.class.path=./daemon.dex / --nice-name=SuToaster com.suisho.kernelsugranttoast.Entry "$customToastText" "$ignoredPackages" "$packageSearchDepth" "$autoDeleteLog"

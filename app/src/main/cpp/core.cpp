@@ -24,7 +24,6 @@ static std::map<uint32_t, time_t> toastedApplication;
 static std::map<uint32_t, time_t> ignoredProcess;
 static std::map<uint32_t, time_t> ignoredUid;
 static short packageSearchDepth = 1;
-static bool checkSuCompat = false;
 static bool autoDeleteLog = false;
 
 struct __attribute__((packed)) EventRecordHeader {
@@ -196,10 +195,8 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved) {
 
 extern "C"
 JNIEXPORT jboolean JNICALL
-Java_com_suisho_kernelsugranttoast_Entry_jniInit(JNIEnv *env, jclass clazz, short searchDepth,
-                                                 jboolean checkCompat, jboolean deleteLog) {
+Java_com_suisho_kernelsugranttoast_Entry_jniInit(JNIEnv *env, jclass clazz, short searchDepth,jboolean deleteLog) {
     packageSearchDepth = searchDepth;
-    checkSuCompat = checkCompat;
     autoDeleteLog = deleteLog;
     if (!utilInit()) return false;
     if (!handleSuLog()) return false;

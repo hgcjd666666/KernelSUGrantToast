@@ -4,7 +4,6 @@ import { Separator } from "@/components/ui/separator";
 import { LanguageContext } from "@/contexts/LanguageContext";
 import { useContext } from "react";
 import { useI18n } from "@/hooks/useI18n";
-import CheckCompatEventSetting from "./components/CheckCompatEventSetting";
 
 
 export default function AdvancedPage() {
@@ -15,8 +14,6 @@ export default function AdvancedPage() {
             <FieldDescription className="text-yellow-500 text-center">{getLang("advanced.warning")}</FieldDescription>
             <Separator className="mt-2" />
             <SearchDepthSetting />
-            <Separator className="mt-2" />
-            <CheckCompatEventSetting />
         </div>
     )
 }

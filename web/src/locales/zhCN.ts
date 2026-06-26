@@ -46,10 +46,6 @@ const SimplifiedChineseKeys = {
     "advanced.searchDepth.description":"输入应为0-32之间 默认值1",
     "advanced.searchDepth.description.detail":'过高影响性能 过低可能导致某些提权数据被忽略 通常保持默认已经够用.除非比较在意如"Termux里运行的Codex里执行了su"这种极端情况',
 
-    "advanced.suCompat.label":"检查SuCompat事件",
-    "advanced.suCompat.description":"仅建议在无法正常提示时启用",
-    "advanced.suCompat.description.detail":"部分系统或应用只会触发该类型事件(极少出现这种情况) 开启后可能修复提示遗漏或失效 但会增加性能开销",
-
     "about.description":"像Magisk一样弹出授予超级用户权限Toast",
     "about.button.repository":"项目仓库",
     "about.otherProjects.title":"其他项目",

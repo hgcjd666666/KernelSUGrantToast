@@ -47,10 +47,6 @@ const TraditionalChineseKeys: typeof BaseLang = {
     "advanced.searchDepth.description": "輸入值應介於0-32之間，預設值為1",
     "advanced.searchDepth.description.detail": '過高會影響效能，過低可能導致某些提權資料被忽略。通常保持預設值已經足夠，除非你特別在意像「在 Termux 裡執行的 Codex 中執行了 su」這種極端情況',
 
-    "advanced.suCompat.label": "檢查 SuCompat 事件",
-    "advanced.suCompat.description": "僅建議在無法正常顯示提示時啟用",
-    "advanced.suCompat.description.detail": "部分系統或應用程式只會觸發此類型事件（極少出現這種情況），啟用後可能修復提示遺漏或失效，但會增加效能開銷",
-
     "about.description": "像 Magisk 一樣彈出授予超級使用者權限 Toast",
     "about.button.repository": "專案倉庫",
     "about.otherProjects.title": "其他專案",

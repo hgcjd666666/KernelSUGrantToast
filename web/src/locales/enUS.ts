@@ -48,10 +48,6 @@ const EnglishKeys: typeof BaseLang = {
   "advanced.searchDepth.description": "Enter a value between 0 and 32. Default: 1",
   "advanced.searchDepth.description.detail": "Setting this too high may hurt performance, while setting it too low may cause some privilege-escalation data to be ignored. The default value is usually sufficient unless you care about edge cases such as running 'su' from Codex inside Termux.",
 
-  "advanced.suCompat.label": "Check SuCompat events",
-  "advanced.suCompat.description": "Only recommended if prompts are not shown properly",
-  "advanced.suCompat.description.detail": "Some systems or apps trigger only this type of event, though this is rare. Enabling it may fix missing or non-functional prompts, but it also increases overhead.",
-
   "about.description": "Show a root granted toast like Magisk",
   "about.button.repository": "Project Repository",
   "about.otherProjects.title": "Other Projects",

@@ -33,12 +33,10 @@ public class Entry {
 
     private static class TempArguments {
         public final short packageSearchDepth;
-        public final boolean checkSuCompat;
         public final boolean autoDeleteLog;
 
-        public TempArguments(short packageSearchDepth, boolean checkSuCompat, boolean autoDeleteLog) {
+        public TempArguments(short packageSearchDepth, boolean autoDeleteLog) {
             this.packageSearchDepth = packageSearchDepth;
-            this.checkSuCompat = checkSuCompat;
             this.autoDeleteLog = autoDeleteLog;
         }
     }
@@ -68,7 +66,7 @@ public class Entry {
             //确定没有崩掉再加载
             //app_process没法加载内置so
             System.load(libraryFile.getAbsolutePath());
-            if(!jniInit(tmpArgs.packageSearchDepth, tmpArgs.checkSuCompat, tmpArgs.autoDeleteLog)) {
+            if(!jniInit(tmpArgs.packageSearchDepth, tmpArgs.autoDeleteLog)) {
                 onInitFailed("Native init failed!");
                 System.exit(1);
                 return;
@@ -95,7 +93,6 @@ public class Entry {
 
     private static TempArguments parseArguments(String[] args) {
         short packageSearchDepth = 1;
-        boolean checkSuCompat = false;
         boolean autoDeleteLog = false;
         //自定义提示文本
         if(args.length > 0 && args[0] != null) {
@@ -138,27 +135,17 @@ public class Entry {
                 Log.e(TAG, "Invalid package search depth!", numberFormatException);
             }
         }
-        //compat检查
+        //自动移除log
         if(args.length > 3 && args[3] != null) {
             try {
-                Log.i(TAG, "Found check su compat setting");
-                checkSuCompat = Boolean.parseBoolean(args[3]);
-                Log.i(TAG, "Set check su compat to " + checkSuCompat);
-            } catch (NumberFormatException numberFormatException) {
-                Log.e(TAG, "Invalid check su compat setting!", numberFormatException);
-            }
-        }
-        //自动移除log
-        if(args.length > 4 && args[4] != null) {
-            try {
                 Log.i(TAG, "Found auto delete log setting");
-                autoDeleteLog = Boolean.parseBoolean(args[4]);
+                autoDeleteLog = Boolean.parseBoolean(args[3]);
                 Log.i(TAG, "Set auto delete log to " + autoDeleteLog);
             } catch (NumberFormatException numberFormatException) {
                 Log.e(TAG, "Invalid auto delete log setting!", numberFormatException);
             }
         }
-        return new TempArguments(packageSearchDepth, checkSuCompat, autoDeleteLog);
+        return new TempArguments(packageSearchDepth, autoDeleteLog);
     }
 
     private static void showToast(String pkgName) {
@@ -253,7 +240,7 @@ public class Entry {
         }
     }
 
-    private static native boolean jniInit(short packageSearchDepth, boolean checkSuCompat, boolean autoDeleteLog);
+    private static native boolean jniInit(short packageSearchDepth, boolean autoDeleteLog);
 
     private static native void jniSetUid(int uid);
     private static native void jniProcessSharedUidApplication(int ppid);
