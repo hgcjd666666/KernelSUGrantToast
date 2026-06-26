@@ -46,7 +46,7 @@ const EnglishKeys: typeof BaseLang = {
   "advanced.searchDepth.label": "Package Search Depth",
   "advanced.searchDepth.save.failed.invalid": "Invalid input, should be between 0 and 32",
   "advanced.searchDepth.description": "Enter a value between 0 and 32. Default: 1",
-  "advanced.searchDepth.description.detail": "Setting this too high may hurt performance, while setting it too low may cause some privilege-escalation data to be ignored. The default value is usually sufficient unless you care about edge cases such as running 'su' from Codex inside Termux.",
+  "advanced.searchDepth.description.detail": "Setting this too high may hurt performance, while setting it too low may cause some privilege-escalation data to be ignored. This setting only takes effect when encountering apps with shared UIDs (which require falling back to the old detection logic).",
 
   "about.description": "Show a root granted toast like Magisk",
   "about.button.repository": "Project Repository",

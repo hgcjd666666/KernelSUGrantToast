@@ -45,7 +45,7 @@ const TraditionalChineseKeys: typeof BaseLang = {
     "advanced.searchDepth.label": "應用程式套件搜尋深度",
     "advanced.searchDepth.save.failed.invalid": "輸入數值無效，應介於0-32之間",
     "advanced.searchDepth.description": "輸入值應介於0-32之間，預設值為1",
-    "advanced.searchDepth.description.detail": '過高會影響效能，過低可能導致某些提權資料被忽略。通常保持預設值已經足夠，除非你特別在意像「在 Termux 裡執行的 Codex 中執行了 su」這種極端情況',
+    "advanced.searchDepth.description.detail": "過高會影響效能，過低可能導致某些提權資料被忽略。此設定只在遇到使用共享 UID 的應用程式（需要退回舊的檢測邏輯）時生效",
 
     "about.description": "像 Magisk 一樣彈出授予超級使用者權限 Toast",
     "about.button.repository": "專案倉庫",

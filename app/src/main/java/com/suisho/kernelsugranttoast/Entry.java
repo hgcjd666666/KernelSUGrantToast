@@ -234,6 +234,7 @@ public class Entry {
                 Log.w(TAG, "ksud file not found!");
                 return;
             }
+            //todo 设置热更新
             String desc = String.format(Locale.getDefault(), "[%s]Show a root granted toast like Magisk.Require SuLog enabled.", descText);
             ProcessBuilder processBuilder = new ProcessBuilder("/data/adb/ksud", "module", "config", "set", "--temp", "override.description", desc);
             processBuilder.environment().put("KSU_MODULE", "ksuGrantToast");

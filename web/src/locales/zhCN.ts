@@ -44,7 +44,7 @@ const SimplifiedChineseKeys = {
     "advanced.searchDepth.label":"应用包搜索深度",
     "advanced.searchDepth.save.failed.invalid":"输入数值无效 应为0-32之间",
     "advanced.searchDepth.description":"输入应为0-32之间 默认值1",
-    "advanced.searchDepth.description.detail":'过高影响性能 过低可能导致某些提权数据被忽略 通常保持默认已经够用.除非比较在意如"Termux里运行的Codex里执行了su"这种极端情况',
+    "advanced.searchDepth.description.detail":'过高影响性能 过低可能导致某些提权数据被忽略.该设置只在遇到使用共享UID的应用(需要回退到旧检测逻辑)时生效',
 
     "about.description":"像Magisk一样弹出授予超级用户权限Toast",
     "about.button.repository":"项目仓库",
