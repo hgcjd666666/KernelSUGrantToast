@@ -65,11 +65,6 @@ void pushIgnoredUidMap(uint32_t pid, time_t timestamp) {
 }
 
 //对于有sharedUserId的应用 靠uid判断具体提权是不稳定的 需要回退到老逻辑
-//TODO 移除ppid或包名限流 因为这种应用并不多
-void processSharedUidApplicationSuEvent(JNIEnv *threadJniEnv, uint32_t ppid) {
-
-}
-
 void processSuEvent(JNIEnv *threadJniEnv, uint32_t uid, uint32_t ppid) {
     time_t currentTime = time(nullptr);
     auto findUidResult = ignoredUid.find(uid);
@@ -210,7 +205,6 @@ Java_com_suisho_kernelsugranttoast_Entry_jniProcessSharedUidApplication(JNIEnv *
     if (findPpidResult != ignoredProcess.end()) {
         //相同ppid的请求每3秒最多处理一个
         if (currentTime - findPpidResult->second <= 3) {
-            LOGI("return by ppid");
             //避免toast无法显示
             setresuid(1000, 1000, 0);
             return;
@@ -219,7 +213,6 @@ Java_com_suisho_kernelsugranttoast_Entry_jniProcessSharedUidApplication(JNIEnv *
     pushIgnoredProcessMap(ppid, currentTime);
     AndroidAppInfo appInfo = queryAndroidApplicationInfo(static_cast<pid_t>(ppid),
                                                          packageSearchDepth);
-    //TODO 这里应该能优化下 晚点再搞了 先抢救新版本用不了
     if (appInfo.isAndroidApp && !appInfo.cmdline.empty()) {
         auto findToastedApplicationResult = toastedApplication.find(appInfo.realPid);
         if (findToastedApplicationResult != toastedApplication.end()) {
