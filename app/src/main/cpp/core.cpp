@@ -116,7 +116,6 @@ void pollingLogEvent(int suLogFd) {
                             if (rec->payload_len >= sizeof(SulogEventHeader) && hdr->uid != 0 &&
                                 hdr->retval == 0) {
 //                              //只有这两个是来自第三方的调用 GRANT_ROOT是对管理器自动授权 不要处理
-//                              //绝大多数root获取都会走ksud
                                 if (hdr->event_type == KSU_SULOG_EVENT_ROOT_EXECVE ||
                                     hdr->event_type == KSU_SULOG_EVENT_SUCOMPAT) {
                                     processSuEvent(localJniEnv, hdr->uid, hdr->ppid);
@@ -228,4 +227,10 @@ Java_com_suisho_kernelsugranttoast_Entry_jniProcessSharedUidApplication(JNIEnv *
         threadJniEnv->DeleteLocalRef(cmd);
     }
     setresuid(1000, 1000, 0);
+}
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_suisho_kernelsugranttoast_Entry_updatePackageSearchDepth(JNIEnv *env, jclass clazz,
+                                                                  jshort value) {
+    packageSearchDepth = value;
 }

@@ -13,18 +13,28 @@ import android.widget.Toast;
 
 import org.lsposed.hiddenapibypass.HiddenApiBypass;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.RandomAccessFile;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Locale;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 
 public class Entry {
+    private static final Set<String> allowedSettingKeys = new HashSet<>(Arrays.asList("customToastText", "ignorePackageNames", "packageSearchDepth"));
     private static final String TAG = "KernelSuGrantToast";
     private static Context systemContext;
     private static Handler handler;
     private static PackageManager packageManager;
+    private static FileInputStream ipcInputStream;
+    private static RandomAccessFile ipcPipe;
     //缓存应用名 避免每次都走PackageManager
     private static final LruCache<String, String> appNameCache = new LruCache<>(32);
     private static String customToastText = Messages.getLocaleMessage();
@@ -71,6 +81,8 @@ public class Entry {
                 return;
             }
             modifyModuleDescription(String.format(Locale.getDefault(), "✅Working.PID:%d,Ignored package(s) count:%d", Process.myPid(), ignorePackageList.size()));
+            //TODO 开启实验性选项后才监听
+            initSettingHotUpdateIpcListener();
             //降权 不然就是java.lang.SecurityException: Package android is not owned by uid 0
             //等写入描述完成才执行 系统框架没模块目录权限
             jniSetUid(1000);
@@ -97,7 +109,7 @@ public class Entry {
         if(args.length > 0 && args[0] != null) {
             String tempCustomText = args[0];
             Log.i(TAG, "Found custom toast text");
-            if(tempCustomText.length() < 65 && tempCustomText.contains("%s")) {
+            if(Util.checkConfigConfigValueValid("customToastText", tempCustomText)) {
                 customToastText = tempCustomText;
             } else {
                 Log.w(TAG, "Invalid custom toast text!");
@@ -122,13 +134,15 @@ public class Entry {
         //搜索深度
         if(args.length > 2 && args[2] != null) {
             try {
-                short tempSearchDepth = Short.parseShort(args[2]);
-                Log.i(TAG, "Found custom package search depth");
-                if(tempSearchDepth >= 0 && tempSearchDepth < 33) {
-                    packageSearchDepth = tempSearchDepth;
-                    Log.i(TAG, "Set package search depth to " + tempSearchDepth);
-                } else {
-                    Log.w(TAG, "Invalid package search depth!");
+                if(Util.checkConfigConfigValueValid("packageSearchDepth", args[2])) {
+                    short tempSearchDepth = Short.parseShort(args[2]);
+                    Log.i(TAG, "Found custom package search depth");
+                    if(tempSearchDepth >= 0 && tempSearchDepth < 33) {
+                        packageSearchDepth = tempSearchDepth;
+                        Log.i(TAG, "Set package search depth to " + tempSearchDepth);
+                    } else {
+                        Log.w(TAG, "Invalid package search depth!");
+                    }
                 }
             } catch (NumberFormatException numberFormatException) {
                 Log.e(TAG, "Invalid package search depth!", numberFormatException);
@@ -137,9 +151,11 @@ public class Entry {
         //自动移除log
         if(args.length > 3 && args[3] != null) {
             try {
-                Log.i(TAG, "Found auto delete log setting");
-                autoDeleteLog = Boolean.parseBoolean(args[3]);
-                Log.i(TAG, "Set auto delete log to " + autoDeleteLog);
+                if(Util.checkConfigConfigValueValid("autoDeleteLog", args[3])) {
+                    Log.i(TAG, "Found auto delete log setting");
+                    autoDeleteLog = Boolean.parseBoolean(args[3]);
+                    Log.i(TAG, "Set auto delete log to " + autoDeleteLog);
+                }
             } catch (NumberFormatException numberFormatException) {
                 Log.e(TAG, "Invalid auto delete log setting!", numberFormatException);
             }
@@ -234,7 +250,6 @@ public class Entry {
                 Log.w(TAG, "ksud file not found!");
                 return;
             }
-            //todo 设置热更新
             String desc = String.format(Locale.getDefault(), "[%s]Show a root granted toast like Magisk.Require SuLog enabled.", descText);
             ProcessBuilder processBuilder = new ProcessBuilder("/data/adb/ksud", "module", "config", "set", "--temp", "override.description", desc);
             processBuilder.environment().put("KSU_MODULE", "ksuGrantToast");
@@ -247,9 +262,91 @@ public class Entry {
         }
     }
 
+    private static void initSettingHotUpdateIpcListener() {
+        File pipeFile = new File("/data/adb/toast_ipc");
+        if(!pipeFile.exists()) {
+            Log.w(TAG, "IPC pipe file not found!");
+            return;
+        }
+        //自保留写端
+        try {
+            ipcPipe = new RandomAccessFile(pipeFile, "rw");
+            ipcInputStream = new FileInputStream(ipcPipe.getFD());
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to open IPC pipe file", e);
+            onFatalException("Failed to open IPC pipe file");
+        }
+        new Thread(() -> {
+            try {
+                //等自己的写入端开启
+                BufferedReader reader = new BufferedReader(new InputStreamReader(ipcInputStream, StandardCharsets.UTF_8));
+                String line;
+                Log.i(TAG, "Start ipc polling");
+                while ((line = reader.readLine()) != null) {
+                    Log.i(TAG, "Received IPC message: " + line);
+                    String[] splitMessage = line.split((char) 0x2 +" ", 2);
+                    if(splitMessage.length != 2) {
+                        Log.w(TAG, "Invalid IPC message format");
+                        continue;
+                    }
+                    if(!allowedSettingKeys.contains(splitMessage[0])) {
+                        Log.w(TAG, "Invalid setting key: " + splitMessage[0]);
+                        continue;
+                    }
+                    if(!Util.checkConfigConfigValueValid(splitMessage[0], splitMessage[1])) {
+                        //重置内容检测
+                        if(splitMessage[0].equals("customToastText") && splitMessage[1].isEmpty()) {
+                            customToastText = Messages.getLocaleMessage();
+                            Log.i(TAG, "Custom toast text reset");
+                            continue;
+                        } else if(splitMessage[0].equals("ignorePackageNames") && splitMessage[1].isEmpty()) {
+                            ignorePackageList.clear();
+                            Log.i(TAG, "Ignore package list reset");
+                            continue;
+                        }else if(splitMessage[0].equals("packageSearchDepth") && splitMessage[1].isEmpty()){
+                            updatePackageSearchDepth((short) 0);
+                            Log.i(TAG, "Package search depth reset");
+                            continue;
+                        }
+                        Log.w(TAG, "Invalid config value: " + splitMessage[1]);
+                        continue;
+                    }
+                    switch (splitMessage[0]) {
+                        case "customToastText":
+                            customToastText = splitMessage[1];
+                            Log.i(TAG, "Custom toast text updated");
+                            break;
+                        case "ignorePackageNames":
+                            ignorePackageList.clear();
+                            String[] rawSplit = splitMessage[1].split(";");
+                            for(String packageName : rawSplit) {
+                                if(!packageName.isEmpty()) ignorePackageList.add(packageName);
+                            }
+                            Log.i(TAG, "Ignore package list updated");
+                            break;
+                        case "packageSearchDepth":
+                            updatePackageSearchDepth(Short.parseShort(splitMessage[1]));
+                            Log.i(TAG, "Package search depth updated");
+                            break;
+                        //autoDeleteLog没有热更新的意义
+                        default:
+                            Log.w(TAG, "Unknown setting key or key not supported hot update: " + splitMessage[0]);
+                    }
+                }
+                Log.w(TAG, "Stop ipc polling");
+            } catch (IOException e) {
+                Log.e(TAG, "Failed to read IPC pipe file", e);
+                onFatalException("Failed to read IPC pipe file");
+            }
+        }, "Setting IPC thread").start();
+    }
+
     private static native boolean jniInit(short packageSearchDepth, boolean autoDeleteLog);
 
     private static native void jniSetUid(int uid);
 
     private static native void jniProcessSharedUidApplication(int ppid);
+
+    //目前就这一个key需要在native层更新 先这样写着吧
+    private static native void updatePackageSearchDepth(short value);
 }
