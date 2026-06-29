@@ -9,6 +9,8 @@ const EnglishKeys: typeof BaseLang = {
   "text.detail": "Details",
   "text.followSystem": "Follow System",
 
+
+  "tabs.advanced": "Advanced",
   "tabs.ignorePackage": "Ignore List",
   "tabs.base": "Basic",
   "tabs.about": "About",
@@ -22,7 +24,7 @@ const EnglishKeys: typeof BaseLang = {
   "theme.light": "Light",
 
   "toast.custom.title": "Custom Toast Message",
-  "toast.custom.placeholder": "%s was granted Superuser rights",
+  "toast.custom.placeholder": "%s was granted Superuser rights",//Magisk提示原句 不要改
   "toast.custom.description": "Must contain the '%s' placeholder and be fewer than 64 characters",
   "toast.save.reset.success": "Default toast message restored",
   "toast.save.error.invalidLength": "Message length must be less than 64 characters",
@@ -39,6 +41,13 @@ const EnglishKeys: typeof BaseLang = {
   "autoDeleteLog.label": "Auto-delete logs",
   "autoDeleteLog.detail": "Automatically delete SuLog logs generated during startup after initialization is complete. This can prevent log files from piling up and taking up storage, but may make it harder to report issues because these log files may be useful.",
 
+  "advanced.warning": "Improper settings on this page may affect performance or cause malfunctions",
+  "advanced.searchDepth.reset.success": "Reset to default",
+  "advanced.searchDepth.label": "Package Search Depth",
+  "advanced.searchDepth.save.failed.invalid": "Invalid input, should be between 0 and 32",
+  "advanced.searchDepth.description": "Enter a value between 0 and 32. Default: 1",
+  "advanced.searchDepth.description.detail": "Setting this too high may hurt performance, while setting it too low may cause some privilege-escalation data to be ignored. This setting only takes effect when encountering apps with shared UIDs (which require falling back to the old detection logic).",
+
   "about.description": "Show a root granted toast like Magisk",
   "about.button.repository": "Project Repository",
   "about.otherProjects.title": "Other Projects",
@@ -46,5 +55,6 @@ const EnglishKeys: typeof BaseLang = {
   "about.otherProjects.description.connector.windows": "Transfer files between phone and PC over a local network, forward notifications, and more (Windows side)",
   "about.otherProjects.description.connector.android": "Transfer files and text between phone and PC over a local network, forward notifications, and more (Android side)",
   "about.otherProjects.description.ruru": "A fork of a well-known app list detector, with stronger detection and support for custom target apps",
+
 }
 export default EnglishKeys;

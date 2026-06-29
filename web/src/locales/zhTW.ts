@@ -11,6 +11,7 @@ const TraditionalChineseKeys: typeof BaseLang = {
 
     "tabs.base": "基本",
     "tabs.ignorePackage": "忽略清單",
+    "tabs.advanced": "進階",
     "tabs.about": "關於",
 
     "language.label": "語言",
@@ -38,6 +39,13 @@ const TraditionalChineseKeys: typeof BaseLang = {
 
     "autoDeleteLog.label": "自動刪除日誌",
     "autoDeleteLog.detail": "初始化完成後自動刪除啟動時產生的 SuLog 日誌，可避免日誌檔案堆積占用儲存空間，但可能不利於回報異常（這些日誌檔案可能有用）",
+
+    "advanced.warning": "此頁面的設定若調整不當，可能影響效能或導致運作異常",
+    "advanced.searchDepth.reset.success": "已還原預設值",
+    "advanced.searchDepth.label": "應用程式套件搜尋深度",
+    "advanced.searchDepth.save.failed.invalid": "輸入數值無效，應介於0-32之間",
+    "advanced.searchDepth.description": "輸入值應介於0-32之間，預設值為1",
+    "advanced.searchDepth.description.detail": "過高會影響效能，過低可能導致某些提權資料被忽略。此設定只在遇到使用共享 UID 的應用程式（需要退回舊的檢測邏輯）時生效",
 
     "about.description": "像 Magisk 一樣彈出授予超級使用者權限 Toast",
     "about.button.repository": "專案倉庫",

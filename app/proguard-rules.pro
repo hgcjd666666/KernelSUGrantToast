@@ -20,9 +20,4 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
--keep class com.suisho.kernelsugranttoast.Entry {
-    public static void main(java.lang.String[]);
-    public static void jniOnNewSuEvent(int);
-    private static void onNativeError(java.lang.String);
-    native <methods>;
-}
+-keep class com.suisho.kernelsugranttoast.Entry {    public static void main(java.lang.String[]);    public static void jniOnNewSuEvent(int);    private static void onFatalException(java.lang.String);    native <methods>;}

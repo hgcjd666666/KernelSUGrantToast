@@ -1,4 +1,4 @@
-### 1.9
+### 1.9.1同步上游 NativeStar/KernelSUGrantToast 至 29afb53（daemon热更新配置支持）
 同步上游 NativeStar/KernelSUGrantToast 至最新提交
 
 ### 1.8
