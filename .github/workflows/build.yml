@@ -54,7 +54,7 @@ jobs:
           else
             VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "unknown")
           fi
-          VERSION_CODE=$(echo "$VERSION" | sed 's/.*\.//')
+          VERSION_CODE=$(echo "$VERSION" | awk -F'.' '{s=$1; for(i=2;i<=NF;i++) s=s sprintf("%02d", $i); print s}')
           sed -i "s/@VERSION@/$VERSION/g" module/module.prop
           sed -i "s/@VERSION_CODE@/$VERSION_CODE/g" module/module.prop
 
